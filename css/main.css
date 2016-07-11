@@ -1,0 +1,74 @@
+/**
+ * formatarea partii de sus a paginii
+ **/
+#top{
+	width: 100%;
+	height: 60px;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	background-color: #ffe055;
+}
+
+#top div {
+	width: 1190px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 12px;
+}
+
+#top div ul {
+	width: 95%;
+	list-style-type: none;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding: 0;
+}
+
+#top div ul li {
+	float: left;
+	margin-right: 2px;
+	padding: 0;
+}
+
+#top div ul li a {
+	display: block;
+	background-color: #9ACD32;
+	color: #191970;
+	font-size: 1em;
+	font-weight: bold;
+	text-decoration: none;
+	text-align: center;
+	padding: 5px 20px;
+}
+
+#top div ul li a:hover {
+	background-color: #090;
+}
+
+#logo {
+	position: absolute;
+	width: 200px;
+	left: 0;
+	top: 0;
+	font-size: 1.4em;
+	margin: 0;
+	padding: 5px 10px;
+}
+
+#logo a {
+	text-decoration: none;
+	color: #333;
+}
+
+#nume {
+	position: absolute;
+	width: 300px;
+	right: 0;
+	top: 0;
+	padding: 3px 10px;
+	margin: 0;
+	font-size: .8em;
+}

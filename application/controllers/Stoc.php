@@ -115,7 +115,7 @@ class Home extends CI_Controller {
 		foreach($qry->result() as $row){
 			
 			$str .= '<li><a class="' .
-				$row->class . '" href="index.php/' .
+				$row->class . '" href="' .
 				$row->class . '">' .
 				$row->denumire . "</a></li>\n";
 		}

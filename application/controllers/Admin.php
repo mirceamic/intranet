@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Home extends CI_Controller {
+class Admin extends CI_Controller {
 	
-	public function index($page = 'home')
+	public function index($page = 'admin')
 	{
 		$this->output->enable_profiler(TRUE);
 		
@@ -115,7 +115,7 @@ class Home extends CI_Controller {
 		foreach($qry->result() as $row){
 			
 			$str .= '<li><a class="' .
-				$row->class . '" href="index.php/' .
+				$row->class . '" href="' .
 				$row->class . '">' .
 				$row->denumire . "</a></li>\n";
 		}

@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-?><!DOCTYPE html>
+?>
+<!DOCTYPE html>
 <html lang="ro">
 <head>
 	<meta charset="utf-8">
@@ -15,3 +16,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	?>
 </head>
 <body>
+	<div id="top">
+		<h3 id="logo">
+			<a href="<?php echo base_url(); ?>">
+				Intranet<br />Oradea
+			</a>
+		</h3>
+		<h3 id="nume">
+			Utilizator: <?php echo $this->session->username . "\n"; ?>
+		</h3>
+		<ul>
+<?php echo $this->session->meniuri; ?>
+		</ul>
+	</div>

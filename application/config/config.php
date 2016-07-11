@@ -23,7 +23,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://cipacasa.go.ro/intranet_ci';
+#$config['base_url'] = 'http://cipacasa.go.ro/intranet_ci';
+$config['base_url'] = 'http://oradea/intranet_ci';
 
 /*
 |--------------------------------------------------------------------------
@@ -213,7 +214,7 @@ $config['directory_trigger'] = 'd';
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 0;
+$config['log_threshold'] = 2;
 
 /*
 |--------------------------------------------------------------------------
