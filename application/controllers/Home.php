@@ -105,20 +105,35 @@ class Home extends CI_Controller {
 		
 		## construieste interogarea pentru meniuri
 		$sql = 'select pos, class, denumire from glb_meniu where id in ('
-			. $menuid . ')';
+			. $menuid . ') order by pos';
 		
 		## extrage datele din DB
 		$qry = $this->db->query($sql);
 		
-		$str = '';
+		## afla numarul de randuri aduse din DB
+		## este numarul de meniuri asociate utilizatorului
+		$x = $qry->num_rows();
+		
+		## afla procentul asociat fiecarui element din meniu
+		## se aduna cu 2 pentru cele 2 elemente goale de la margine
+		$y = number_format(100 / ($x + 2),2);
+		
+		## string-ul care tine lista de meniuri
+		$str = '<li style="width:' . $y . '%" class="w3-hide-small">&nbsp;</li>' . "\n";
 		
 		foreach($qry->result() as $row){
 			
-			$str .= '<li><a class="' .
-				$row->class . '" href="index.php/' .
+			$str .= '<li style="width:' . $y . '%"><a class="' .
+				$row->class . '" href="' .
+				base_url() .
+				'index.php/' .
 				$row->class . '">' .
 				$row->denumire . "</a></li>\n";
+			
+			$x++;
 		}
+		
+		$str .= '<li style="width:' . $y . '%" class="w3-hide-small">&nbsp;</li>' . "\n";
 		
 		$this->session->meniuri = $str;
 	}

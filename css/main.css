@@ -1,74 +1,99 @@
+
 /**
- * formatarea partii de sus a paginii
+ * Elementele din header
  **/
-#top{
-	width: 100%;
-	height: 60px;
-	margin: 0;
-	padding: 0;
-	text-align: center;
-	background-color: #ffe055;
-}
-
-#top div {
-	width: 1190px;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 12px;
-}
-
-#top div ul {
-	width: 95%;
-	list-style-type: none;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 0;
-	margin-bottom: 0;
-	padding: 0;
-}
-
-#top div ul li {
-	float: left;
-	margin-right: 2px;
-	padding: 0;
-}
-
-#top div ul li a {
-	display: block;
-	background-color: #9ACD32;
-	color: #191970;
-	font-size: 1em;
-	font-weight: bold;
-	text-decoration: none;
-	text-align: center;
-	padding: 5px 20px;
-}
-
-#top div ul li a:hover {
-	background-color: #090;
-}
-
-#logo {
-	position: absolute;
-	width: 200px;
-	left: 0;
-	top: 0;
-	font-size: 1.4em;
-	margin: 0;
-	padding: 5px 10px;
-}
 
 #logo a {
 	text-decoration: none;
-	color: #333;
+	font-weight: bold;
 }
 
 #nume {
-	position: absolute;
-	width: 300px;
-	right: 0;
-	top: 0;
-	padding: 3px 10px;
-	margin: 0;
-	font-size: .8em;
+	font-weight: bold;
+}
+
+/**
+ * elementele din spate (background)
+ **/
+
+#container {
+	margin-left: 10px;
+}
+
+.w3-label, .w3-input {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.w3-input {
+	/*font-size: 14px;
+	height: 18px;*/
+}
+
+.w3-label {
+	margin-left: 30px;
+	vertical-align: middle;
+	width: 100px;
+}
+
+.formular {
+	float: left;
+	width: 240px;
+}
+.formchk {
+	float: left;
+	width: 150px;
+}
+
+.form {
+	float: left;
+	width: 800px;
+}
+
+/*
+ * stiluri pentru delegatii
+ */
+
+.listadlg p {
+	width: 200px;
+	text-align: center;
+	
+}
+
+.inceput, .sfarsit {
+	margin-left: 5px;
+}
+
+.nume {
+	float: left;
+	margin: 0 0 0 50px;
+}
+
+.asg {
+	float: left;
+	margin: 0 0 0 10px;
+}
+
+.tr1 {
+	color: #ffffff;
+	background-color: #CDDC39;
+	margin: 1px 0 1px 100px;
+}
+
+.tr2 {
+	color: #ffffff;
+	background-color: #3F51B5;
+	margin: 1px 0 1px 70px;
+}
+
+/**
+ * elemente de la pagina pentru generarea PDF-urilor
+ **/
+
+.ct {
+	float: left;
+	width: 100px;
+	border: solid black 1px;
+	text-align: center;
+	margin-bottom: 5px;
 }
