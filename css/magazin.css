@@ -1,0 +1,23 @@
+.magazin {
+	color: #000000;
+	background-color: #8bc34a;
+}
+
+.addform form div {
+	float: left;
+	width: 160px;
+	margin-left: 20px;
+}
+
+.addform form textarea {
+	width: 160px;
+}
+
+.addform form div input,
+.addform form div label {
+	width: 140px;
+}
+
+.eanform {
+	float: left;
+}
