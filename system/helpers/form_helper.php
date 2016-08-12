@@ -158,7 +158,8 @@ if ( ! function_exists('form_hidden'))
 
 		if ($recursing === FALSE)
 		{
-			$form = "\n";
+			$form = "";
+			#$form = "\n";
 		}
 
 		if (is_array($name))

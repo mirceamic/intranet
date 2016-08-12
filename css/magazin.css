@@ -20,4 +20,71 @@
 
 .eanform {
 	float: left;
+	width: 200px;
+}
+
+.break {
+	clear: left;
+}
+
+.ean, .cod, .dep, .grp, .cols, .art, .mat, .col, .pa, .pv, .nr {
+	float: left;
+	margin: 0;
+	border: 1px solid black;
+	width: 100px;
+	padding: 1px 0 0 2px;
+/*	padding: 0;*/
+	text-align: center;
+	height: 26px;
+}
+
+.ean, .cols, .grp {
+	width: 140px;
+}
+
+.cod, .dep {
+	width: 240px;
+}
+
+.mat, .col, .pv {
+	width: 60px;
+}
+
+.pa{
+	width: 120px;
+}
+.nr{
+	width: 90px;
+}
+
+/*.pa, .pv {
+	height: 28px;
+}*/
+
+.pv input {
+	width: 55px;
+}
+
+.pa input {
+	width: 100px;
+}
+
+.pv input,
+.pa input {
+	clear: left;
+	border: none;
+	line-height: 16px;
+}
+
+.buton {
+	float: left;
+	width: 100px;
+	height: 26px;
+	line-height: 18px;
+	margin-left: 5px;
+	text-align: center;
+}
+
+.generare form input{
+	width: 120px;
 }

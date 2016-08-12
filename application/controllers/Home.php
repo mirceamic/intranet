@@ -116,7 +116,8 @@ class Home extends CI_Controller {
 		
 		## afla procentul asociat fiecarui element din meniu
 		## se aduna cu 2 pentru cele 2 elemente goale de la margine
-		$y = number_format(100 / ($x + 2),2);
+		## scade .5 din rezultatul final, pentru siguranta
+		$y = number_format(100 / ($x + 2),2) - .5;
 		
 		## string-ul care tine lista de meniuri
 		$str = '<li style="width:' . $y . '%" class="w3-hide-small">&nbsp;</li>' . "\n";
