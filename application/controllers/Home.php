@@ -5,7 +5,7 @@ class Home extends CI_Controller {
 	
 	public function index($page = 'home')
 	{
-		$this->output->enable_profiler(TRUE);
+#		$this->output->enable_profiler(TRUE);
 		
 		if ( ! file_exists(APPPATH.'views/'.$page.'.php'))
 		{
@@ -103,6 +103,9 @@ class Home extends CI_Controller {
 	## functie pentru determinarea meniurilor utilizatorului
 	private function getMeniu($menuid){
 		
+		## initiaza matricea care va tine meniurile
+		$meniuri = array();
+		
 		## construieste interogarea pentru meniuri
 		$sql = 'select pos, class, denumire from glb_meniu where id in ('
 			. $menuid . ') order by pos';
@@ -132,11 +135,19 @@ class Home extends CI_Controller {
 				$row->denumire . "</a></li>\n";
 			
 			$x++;
+			
+			## populeaza matricea cu meniurile asociate utilizatorului
+			array_push($meniuri, $row->class);
 		}
 		
 		$str .= '<li style="width:' . $y . '%" class="w3-hide-small">&nbsp;</li>' . "\n";
 		
+		## incarca string-ul in sesiune
 		$this->session->meniuri = $str;
+		
+		## incarca matricea de meniuri in sesiune
+		$this->session->chkMenu = $meniuri;
+		
 	}
 	
 }

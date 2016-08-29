@@ -3,18 +3,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Admin extends CI_Controller {
 	
-	public function index($page = 'admin')
+	public function __construct()
 	{
-		## optiuni de debugging
-		$this->output->enable_profiler(TRUE);
+		parent::__construct();
 		
 		##verifica daca exista deja o sesiune pentru utilizator
-		if(!isset($this->session->username)){
+		if(!isset($this->session->username) ||
+			!in_array('admin', $this->session->chkMenu)){
 			
 			## adu datele despre utilizator
 			redirect(base_url());
 			
 		}
+		
+		## optiuni de debugging
+		$this->output->enable_profiler(TRUE);
+		
+	}
+	
+	public function index($page = 'admin')
+	{
 		
 		## daca nu exista pagina de afisat
 		if ( ! file_exists(APPPATH.'views/'.$page.'.php'))
@@ -39,6 +47,69 @@ class Admin extends CI_Controller {
 		## incarca pagina de afisat
 		$this->load->view('header', $data);
 		$this->load->view($page);
+		$this->load->view('footer');
+		
+	}
+	
+	## functie pentru modificarea datelor unui utilizator
+	public function modUser(){
+		
+		/*
+		 * Fa modificarile
+		 */
+		
+		## construieste valoarea pentru meniuri
+		$strMeniuri = '';
+		
+		foreach($this->input->post('meniuri') as $val){
+			$strMeniuri .= $val . ",";
+		}
+		
+		## sterge ultima virgula
+		$strMeniuri = rtrim($strMeniuri, ',');
+		
+		## verifica valoarea campului "inactiv"
+		if(array_key_exists('inactiv', $this->input->post())){
+			$inactiv = 1;
+		} else {
+			$inactiv = 0;
+		}
+		
+		
+		## construieste matricea de campuri care trebuiesc modificate
+		$modificari = array(
+			'marca' => $this->input->post('marca'),
+			'id_pontaj' => $this->input->post('idpontaj'),
+			'cod_pontator' => $this->input->post('codpontaj'),
+			'nume' => $this->input->post('nume'),
+			'prenume' => $this->input->post('prenume'),
+			'user' => $this->input->post('user'),
+			'mac' => $this->input->post('mac'),
+			'inceput' => $this->input->post('inceput'),
+			'sfarsit' => $this->input->post('sfarsit'),
+			'inactiv' => $inactiv,
+			'meniuri' => $strMeniuri
+		);
+		
+		$this->db->where('id', $this->input->post('id'));
+		$this->db->update('glb_angajati', $modificari);
+		
+		/*
+		 * Afiseaza pagina cu modificarile
+		 */
+		
+		## stabileste titlul paginii afisate
+		$data['title'] = 'Utilizator modificat'; // Capitalize the first letter
+		
+		## adu lista cu utilizatorii
+		$data['utilizatori'] = $this->get_UserList();
+		
+		## verifica daca s-a ales vre-un utilizator
+		$data['infouser'] = $this->get_User($this->input->post('users'));
+		
+		## incarca pagina de afisat
+		$this->load->view('header', $data);
+		$this->load->view('admin');
 		$this->load->view('footer');
 		
 	}
@@ -90,7 +161,7 @@ class Admin extends CI_Controller {
 	## functie pentru aducerea informatiilor despre utilizator
 	private function get_User($id){
 		
-		$string = form_open('index.php/admin');
+		$string = form_open('index.php/admin/modUser');
 		
 		## sql-ul pentru aducerea datelor din DB
 		$sql = 'SELECT * FROM glb_angajati WHERE id = ?';
@@ -177,8 +248,17 @@ class Admin extends CI_Controller {
 		$string .= '</div><br style = "clear:left;"/><br />' . "\n";
 		
 		## butoanele checkbox pentru drepturi
+		## checkbox-ul pentru activ/inactiv
+		$string .= '<div class = "formchk">' . "\n";
+		## contruieste label-ul
+		$valoare = $row[0]->inactiv;
+		$string .= form_label('Inactiv', 'inactiv', $labels) . "\n";
+		$string .= form_checkbox('inactiv', 1, $valoare);
+		$string .= "</div>\n";
+		
+		
 		## matricea cu numele checkbox-urilor necesare
-		$chbox = array(
+/*		$chbox = array(
 			'inactiv',
 			'financiar',
 			'pontaj',
@@ -200,7 +280,7 @@ class Admin extends CI_Controller {
 			$string .= form_checkbox($val, 1, $valoare);
 			$string .= "</div>\n";
 		}
-		
+*/		
 		## inchide div-ul "form"
 		$string .= "</div>\n";
 		## meniuri

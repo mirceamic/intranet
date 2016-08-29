@@ -3,3 +3,70 @@
 	background-color: #8bc34a;
 }
 
+.cthead,
+.ctdata {
+	margin: 0;
+	clear: left;
+}
+
+p.footer {
+	color: white;
+}
+
+.ctnr,
+.ctart,
+.ctgroup,
+.ctmat,
+.ctcol,
+.ctcolor,
+.ctrrp,
+.ctprice,
+.ctdelivery,
+.ctcountry,
+.ctassortment,
+.ctpairs,
+.ctgrupa,
+.ctimage,
+.ctgol
+{
+	float: left;
+	border: solid black 1px;
+	text-align: center;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.ctnr,
+.ctmat,
+.ctpairs,
+.ctcol
+{
+	width: 60px;
+}
+
+.ctart,
+.ctgroup,
+.ctrrp,
+.ctprice,
+.ctdelivery,
+.ctassortment,
+.ctcountry
+{
+	width: 100px;
+}
+
+.ctcolor,
+.ctgrupa
+{
+	width: 200px;
+}
+
+.ctimage
+{
+	width: 250px;
+}
+
+.ctgol
+{
+	width: 1130px;
+}

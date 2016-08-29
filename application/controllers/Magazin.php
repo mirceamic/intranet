@@ -8,7 +8,8 @@ class Magazin extends CI_Controller {
 		parent::__construct();
 		
 		##verifica daca exista deja o sesiune pentru utilizator
-		if(!isset($this->session->username)){
+		if(!isset($this->session->username) ||
+			!in_array('magazin', $this->session->chkMenu)){
 			
 			## adu datele despre utilizator
 			redirect(base_url());

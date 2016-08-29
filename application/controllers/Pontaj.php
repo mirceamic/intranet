@@ -9,7 +9,8 @@ class Pontaj extends CI_Controller {
 		$this->output->enable_profiler(TRUE);
 		
 		##verifica daca exista deja o sesiune pentru utilizator
-		if(!isset($this->session->username)){
+		if(!isset($this->session->username) ||
+			!in_array('pontaj', $this->session->chkMenu)){
 			
 			## adu datele despre utilizator
 			redirect(base_url());
