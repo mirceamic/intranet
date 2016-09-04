@@ -3,3 +3,25 @@
 	background-color: #8bc34a;
 }
 
+table tr th,
+table tr td {
+	border: 1px solid black;
+}
+
+th.colnume {
+	width: 250px;
+}
+
+th.detaliu {
+	width: 80px;
+}
+th.detaliuw,
+th.totalw {
+	min-width: 15px;
+	max-width: 15px;
+}
+
+th.total {
+	min-width: 15px;
+	max-width: 15px;
+}

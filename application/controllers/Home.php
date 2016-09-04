@@ -5,7 +5,18 @@ class Home extends CI_Controller {
 	
 	public function index($page = 'home')
 	{
-#		$this->output->enable_profiler(TRUE);
+		#$this->output->enable_profiler(TRUE);
+		
+		## daca se vrea resetarea sesiunii
+		if($page == 'reset'){
+			
+			## distruge sesiunea
+			session_destroy();
+			
+			## redirectioneaza utilizatorul la pagina principala
+			redirect(base_url());
+			
+		}
 		
 		if ( ! file_exists(APPPATH.'views/'.$page.'.php'))
 		{
@@ -149,5 +160,6 @@ class Home extends CI_Controller {
 		$this->session->chkMenu = $meniuri;
 		
 	}
+	
 	
 }

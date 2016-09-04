@@ -61,6 +61,16 @@ class Pdf extends CI_Controller {
 			'delivery' => 24,
 			'country' => 30,
 			'img' => 80
+		),
+		'pdf_tmpl6' => array(
+			'nr' => 10,
+			'art' => 30,
+			'mat' => 15,
+			'col' => 15,
+			'assortment' => 39,
+			'rrp' => 24,
+			'price' => 18,
+			'img' => 80
 		)
 	);
 	
@@ -80,6 +90,9 @@ class Pdf extends CI_Controller {
 		),
 		'pdf_tmpl5' => array(
 			'start' => 227
+		),
+		'pdf_tmpl6' => array(
+			'start' => 175
 		)
 	);
 	
@@ -217,6 +230,25 @@ class Pdf extends CI_Controller {
 			$data['formular'][4] = $this->make_formular($cols, 'pdf_tmpl5');
 			
 		/* T4 */
+		
+		/*
+		 * Template 5
+		 */
+		
+			## matricea coloanelor
+			$cols = array(
+				'art' => 'Art',
+				'mat' => 'Mat',
+				'col' => 'Col',
+				'assortment' => 'Assortment',
+				'rrp' => 'RRP',
+				'price' => 'Price'
+			);
+		
+			## genereaza formularul
+			$data['formular'][5] = $this->make_formular($cols, 'pdf_tmpl6');
+			
+		/* T5 */
 		
 		## contruieste calea intreaga a paginii de incarcat
 		$fpage = 'pdf/' . $page;

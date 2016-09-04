@@ -34,8 +34,6 @@ class Necesar extends CI_Controller {
 		$this->load->view($page);
 		$this->load->view('footer');
 		
-		session_destroy();
-		
 	}
 	
 	## Functii private ##

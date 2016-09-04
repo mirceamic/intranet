@@ -29,7 +29,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</a>
 		</h3>
 		<h3 id="nume" class="w3-right w3-medium">
-			Utilizator: <?php echo $this->session->username . "\n"; ?>
+			Utilizator: <a href = "<?php
+echo base_url('index.php/home/index/reset');
+?>" style = "text-decoration: none;"><?php echo $this->session->username . "\n"; ?></a>
+
 		</h3>
 		<div style = "clear:both;" class = "w3-large">
 			<ul class = "w3-navbar w3-teal w3-center">
