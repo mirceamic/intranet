@@ -520,3 +520,9 @@ $config['proxy_ips'] = '';
  *  FPDF FONT DIRECTORY
  */
 $config['fonts_path'] = APPPATH.'third_party/fonts/';
+
+/*
+ * Calea pentru jQuery
+ */
+
+#$config['jquery112'] = APPPATH.'third_party/jquery-ui-1.12/';

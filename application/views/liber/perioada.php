@@ -1,6 +1,8 @@
 <div id="container">
 	<h3>Concedii</h3>
+	<br />
 <?php echo $linkuri; ?>
+
 	<br />
 <?php echo $tabel; ?>
 	

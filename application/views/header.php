@@ -14,10 +14,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	
 		## adauga fisierul special pentru controlerul cerut
 		echo link_tag('css/' . $this->router->fetch_class() . '.css');
+		
 	?>
 	<style>
-		html, body {
+		html, body, h3, h4 {
 			font-family: "Comic Sans MS", cursive, sans-serif;
+			font-family: "Comic Relief", cursive, sans-serif;
 		}
 	</style>
 </head>
