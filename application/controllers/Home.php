@@ -82,6 +82,7 @@ class Home extends CI_Controller {
 		$sql = 'select id,
 				concat(prenume, ", ", nume) as nume,
 				delegatii,
+				id_dep,
 				meniuri
 			from glb_angajati
 			where inactiv = 0
@@ -99,8 +100,9 @@ class Home extends CI_Controller {
 		## daca sunt rezultate
 		if (isset($row)){
 			$this->session->chkuser = 1;
+			$this->session->userid = $row->id;
 			$this->session->username = $row->nume;
-			$this->session->delegatii = $row->delegatii;
+			#$this->session->delegatii = $row->delegatii;
 			
 			## adu meniurile utilizatorului
 			$this->getMeniu($row->meniuri);

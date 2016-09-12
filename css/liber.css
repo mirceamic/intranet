@@ -50,7 +50,7 @@ th.total {
 	/*padding-top: 10px;*/
 }
 .selectori select {
-	width: 200px;
+	width: 400px;
 }
 .datele select,
 .datele input{
@@ -70,7 +70,10 @@ th.total {
 	clear: left;
 }
 
-
+#atara {
+	float: left;
+	width: 140px;
+}
 
 
 /*! jQuery UI - v1.12.0 - 2016-09-08

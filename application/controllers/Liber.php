@@ -86,11 +86,57 @@ class Liber extends CI_Controller {
 			## daca s-a introdus o perioada noua
 			case 'add':
 				
-				## introdu datele in DB
+				## construieste variabilele comune
+				## de la
+				$dataOut = $this->input->post('from') .
+					' ' .  $this->input->post('orafrom') .
+					':' .  $this->input->post('mfrom') . ':00';
 				
+				## pana la
+				$dataIn = $this->input->post('to') .
+					' ' .  $this->input->post('orato') .
+					':' .  $this->input->post('mto') . ':00';
+				
+				## introdu datele in DB
+				switch($this->input->post('tip')){
+					case 1:
+					case 2:
+						
+						## stabileste loctiitorul
+						$loct = $this->input->post('loct');
+						
+						## tara este goala pentru acest caz
+						$tara = '';
+						
+						break;
+					
+					case 3:
+						
+						## stabileste loctiitorul
+						$loct = '999';
+						
+						## stabileste tara de destinatie
+						$tara = '';
+						
+						break;
+				}
+				
+				## matricea de date care trebuiesc introduse in DB
+				$insertArr = array(
+					'id_ang' => $this->session->userid,
+					'id_inloc' => $loct,
+					'time_out' => $dataOut,
+					'time_in' => $dataIn,
+					'tip' => $this->input->post('tip'),
+					'tara' => $tara,
+					'obs' => $this->input->post('obs')
+				);
+				
+				## introdu datele in DB
+				$this->db->insert('liber_perioade', $insertArr);
 				
 				## trimite mail-ul de confirmare
-				
+				$this->sendMail($this->session->userid, $this->input->post('tip'), $insertArr);
 				
 				## afiseaza prima pagina
 				## creaza link-urile de adaugari
@@ -529,6 +575,38 @@ class Liber extends CI_Controller {
 				'22' => '22',
 				'23' => '23'
 			);
+			
+			## stabileste tipul perioadei
+			$str .= "\n\t" . form_hidden('tip', 3) . "\n";
+			
+			## construieste form-ul pentru tari
+			## matricea tarilor de selectat
+			$tariArr = array(
+				'Romania',
+				'Germania',
+				'India',
+				'Ungaria',
+				'Italia',
+				'China',
+				'Portugalia',
+				'Franta',
+				'Elvetia',
+				'Rusia'
+			);
+			
+			$str .= "\t<h4>Destinatie</h4>\n";
+			
+			foreach($tariArr as $tval){
+				
+				$str .= "\t" . '<div id="atara">' . "\n\t\t";
+				$str .= form_checkbox('tari[]',$tval);
+				$str .= $tval . "</div>\n";
+			}
+			
+			$str .= "\t" . '<div id="atara">' . "\n\t\t";
+			$str .= form_checkbox('tari[]','Ungaria-Aeroport',FALSE,'style = "width: 200px"');
+			$str .= "Ungaria-Aeroport</div>\n";
+			
 		}
 		
 		
@@ -566,7 +644,7 @@ $(function() {
 			'name' => 'from',
 			'id' => 'from'
 		);
-		$formular .= form_input($formData);
+		$formular .= form_input($formData,'','required');
 		$formular .= form_dropdown('orafrom', $selectOra);
 		$formular .= form_dropdown('mfrom', $selectMinut);
 		
@@ -577,8 +655,8 @@ $(function() {
 			'name' => 'to',
 			'id' => 'to'
 		);
-		$formular .= form_input($formData);
-		$formular .= form_dropdown('orato', $selectOra);
+		$formular .= form_input($formData,'','required');
+		$formular .= form_dropdown('orato', $selectOra, '17');
 		$formular .= form_dropdown('mto', $selectMinut);
 		
 		## construieste partea diferita a formularului
@@ -611,14 +689,85 @@ $(function() {
 	}
 	
 	## functie pentru trimiterea unui e-mail
-	private function sendMail(){
+	private function sendMail($id, $tip, $valori){
+		
+		## afla descrierea mail-ului
+		switch($tip){
+			case 1:
+			case 2:
+				
+				$titlu = 'Concedii';
+				$descr = 'un concediu';
+				$col = 'mailcc';
+				
+				break;
+				
+			case 3:
+				
+				$titlu = 'Delegatii';
+				$descr = 'o delegatie';
+				$col = 'dlgcc';
+				
+				break;
+		}
+		
+		## incarca libraria pentru trimiterea mail-urilor
 		$this->load->library('email');
-		$this->email->from('postmaster@astormueller.ro', 'Concedii');
-		$this->email->to('ciprian.mic@astormueller.ro');
-		#$this->email->cc('another@astormueller.ro');
-		#$this->email->bcc('them@their-example.com');
-		$this->email->subject('Email Test');
-		$this->email->message('Testing the email class.');
+		
+		## de la cine se trimite mail-ul
+		$this->email->from('postmaster@astormueller.ro', $titlu);
+		
+		## afla datele necesare despre angajat
+		## afla id-urile la care "mai" trebuie trimis mail-ul
+		$this->db->select('user, ' . $col);
+		$this->db->where('id', $id);
+		$qry = $this->db->get('glb_angajati');
+		$row = $qry->row();
+		
+		## cui i se trimite mail-ul
+		$this->email->to($row->user . '@astormueller.ro');
+		
+		## afla persoanele care trebuiesc sa fie in CC
+		#$cc = explode(',', $row->mailcc);
+		$strx = $row->{$col};
+		$cc = explode(',', $strx);
+		$this->db->select('user');
+		$this->db->where_in('id', $cc);
+		$qry = $this->db->get('glb_angajati');
+		
+		## verifica daca sunt rezultate
+		if($qry->num_rows() > 0){
+			## construieste adresele de CC
+			$ccAddr = '';
+			foreach($qry->result() as $addr){
+				$ccAddr .= $addr->user . '@astormueller.ro, ';
+			}
+			
+			## sterge ultima virgula
+			$ccAddr = rtrim($ccAddr, ', ');
+		
+			$this->email->cc($ccAddr);
+		}
+		
+		
+		## adresele din BCC
+		$this->email->bcc('cimi@astormueller.ro');
+		
+		## subiectul mail-ului
+		$this->email->subject($this->session->username . ' a introdus ' . $descr);
+		
+		## continutul mail-ului
+		$emailMsg = $this->session->username . ' a introdus ' . $descr .
+			"\ncu urmatoarele date:\nData de inceput: " .
+			$valori['time_out'] .
+			"\nData de sfarsit: " .
+			$valori['time_in'] .
+			".\nObservatii: " .
+			$valori['obs']
+		;
+		
+		$this->email->message($emailMsg);
+		
 		$this->email->send();
 	}
 	
