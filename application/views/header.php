@@ -16,12 +16,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		echo link_tag('css/' . $this->router->fetch_class() . '.css');
 		
 	?>
-	<style>
-		html, body, h3, h4 {
-			font-family: "Comic Sans MS", cursive, sans-serif;
-			font-family: "Comic Relief", cursive, sans-serif;
-		}
-	</style>
 </head>
 <body>
 	<header class="w3-container w3-teal">

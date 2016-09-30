@@ -15,15 +15,22 @@ th.colnume {
 th.detaliu {
 	width: 80px;
 }
+
 th.detaliuw,
-th.totalw {
+td.detaliuw,
+th.totalw,
+td.totalw
+{
 	min-width: 10px;
 	max-width: 10px;
+	font-size: 10px;
+	background-color: #d1d1d1;
 }
 
 th.total {
 	min-width: 15px;
 	max-width: 15px;
+	font-size: 12px;
 }
 
 .zliber {
@@ -73,6 +80,53 @@ th.total {
 #atara {
 	float: left;
 	width: 140px;
+}
+
+/*
+ * Legenda
+ */
+.tip1 {
+	background-color: #8BC34A;
+}
+
+.tip2 {
+	background-color: #F0E68C;
+}
+
+.tip3 {
+	background-color: #87CEEB;
+}
+
+div.legenda {
+	width: 300px;
+}
+
+div.tip1,
+div.tip2,
+div.tip3 {
+	float: left;
+	width: 150px;
+	text-align: center;
+}
+
+br.clar {
+	clear: left;
+}
+
+/* */
+
+/*
+ * butoanele de modificare a perioadelor
+ */
+
+input.mod {
+	background:none;
+	border:none; 
+	padding:0;
+	font: inherit;
+	cursor: pointer;
+	font-weight: bold;
+	color: #d35400;
 }
 
 

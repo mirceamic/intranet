@@ -1,3 +1,12 @@
+/*
+ * elemente generale
+ */
+
+html, body, h3, h4, h5 {
+	font-family: "Comic Sans MS", cursive, sans-serif;
+	font-family: "Comic Relief", cursive, sans-serif;
+}
+
 
 /**
  * Elementele din header
@@ -20,26 +29,17 @@
 	margin-left: 10px;
 	margin-right: 5px;
 }
-
+/*
 .w3-label {
 	margin-left: 30px;
 	vertical-align: middle;
 	width: 100px;
 }
+/*
 
-.formular {
-	float: left;
-	width: 240px;
-}
-.formchk {
-	float: left;
-	width: 150px;
-}
 
-.form {
-	float: left;
-	width: 800px;
-}
+
+*/
 
 /*
  * stiluri pentru delegatii
@@ -75,4 +75,12 @@
 	color: #ffffff;
 	background-color: #3F51B5;
 	margin: 1px 0 1px 70px;
+}
+
+/*
+ * Elemente generale
+ */
+
+p.footer {
+	color: white;
 }

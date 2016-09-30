@@ -17,7 +17,7 @@ class Admin extends CI_Controller {
 		}
 		
 		## optiuni de debugging
-		$this->output->enable_profiler(TRUE);
+		#$this->output->enable_profiler(TRUE);
 		
 	}
 	
@@ -68,6 +68,20 @@ class Admin extends CI_Controller {
 		## sterge ultima virgula
 		$strMeniuri = rtrim($strMeniuri, ',');
 		
+		## construieste valoarea pentru mailcc
+		$strMailcc = '';
+		
+		if($this->input->post('mailcc') !== NULL){
+			
+			foreach($this->input->post('mailcc') as $val){
+				$strMailcc .= $val . ",";
+			}
+			
+			## sterge ultima virgula
+			$strMailcc = rtrim($strMailcc, ',');
+			
+		}
+		
 		## verifica valoarea campului "inactiv"
 		if(array_key_exists('inactiv', $this->input->post())){
 			$inactiv = 1;
@@ -88,6 +102,7 @@ class Admin extends CI_Controller {
 			'inceput' => $this->input->post('inceput'),
 			'sfarsit' => $this->input->post('sfarsit'),
 			'inactiv' => $inactiv,
+			'mailcc' => $strMailcc,
 			'meniuri' => $strMeniuri
 		);
 		
@@ -192,57 +207,63 @@ class Admin extends CI_Controller {
 		$string .= form_hidden('users', $row[0]->id);
 		## marca
 		## creaza un div pentru aranjarea fiecarui element
-		$string .= '<div class = "formular">' . "\n";
-		$props['style'] = 'width:50px';
+		$string .= '<div class = "formular1">' . "\n";
+		$props['style'] = 'width:70px';
 		$string .= form_label('Marca', 'marca', $labels) . "\n";
 		$string .= form_input('marca', $row[0]->marca, $props);
 		$string .= "</div>\n";
 		
 		## id_pontaj (id-ul din baza de date a pontatorului)
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular1">' . "\n";
 		$string .= form_label('ID pontaj', 'idpontaj', $labels) . "\n";
 		$string .= form_input('idpontaj', $row[0]->id_pontaj, $props);
 		$string .= "</div>\n";
 		
 		## cod_pontator (codul din pontator)
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular1">' . "\n";
 		$string .= form_label('Cod pontator', 'codpontaj', $labels) . "\n";
 		$string .= form_input('codpontaj', $row[0]->cod_pontator, $props);
+		$string .= "</div>\n";
+		
+		## id-ul persoanelor care trebuiesc sa fie in CC la Delegatii
+		$string .= '<div class = "formular1">' . "\n";
+		$string .= form_label('CC Delegatie', 'dlgcc', $labels) . "\n";
+		$string .= form_input('dlgcc', $row[0]->dlgcc, $props);
 		$string .= '</div><br style = "clear:left;"/><br />' . "\n";
 		
 		## nume
 		$props['style'] = 'width:170px';
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular2">' . "\n";
 		$string .= form_label('Nume', 'nume', $labels) . "\n";
 		$string .= form_input('nume', $row[0]->nume, $props);
 		$string .= "</div>\n";
 		
 		## prenume
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular2">' . "\n";
 		$string .= form_label('Prenume', 'prenume', $labels) . "\n";
 		$string .= form_input('prenume', $row[0]->prenume, $props);
 		$string .= "</div>\n";
 		
 		## utilizator
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular2">' . "\n";
 		$string .= form_label('Nume de utilizator (e-mail)', 'user', $labels) . "\n";
 		$string .= form_input('user', $row[0]->user, $props);
 		$string .= '</div><br style = "clear:left;"/><br />' . "\n";
 		
 		## adresa mac
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular2">' . "\n";
 		$string .= form_label('Adresa MAC', 'mac', $labels) . "\n";
 		$string .= form_input('mac', $row[0]->mac, $props);
 		$string .= "</div>\n";
 		
 		## data inceput
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular2">' . "\n";
 		$string .= form_label('Data angajare', 'inceput', $labels) . "\n";
 		$string .= form_input('inceput', $row[0]->inceput, $props);
 		$string .= "</div>\n";
 		
 		## data sfarsit
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular2">' . "\n";
 		$string .= form_label('Data incheiere CIM', 'sfarsit', $labels) . "\n";
 		$string .= form_input('sfarsit', $row[0]->sfarsit, $props);
 		$string .= '</div><br style = "clear:left;"/><br />' . "\n";
@@ -256,41 +277,23 @@ class Admin extends CI_Controller {
 		$string .= form_checkbox('inactiv', 1, $valoare);
 		$string .= "</div>\n";
 		
-		
-		## matricea cu numele checkbox-urilor necesare
-/*		$chbox = array(
-			'inactiv',
-			'financiar',
-			'pontaj',
-			'mk',
-			'l121',
-			'rapoarte',
-			'aprobator',
-			'pdf',
-			'admin'
-		);
-		
-		## construieste un loop pentru fiecare checkbox
-		foreach($chbox as $val){
-			$string .= '<div class = "formchk">' . "\n";
-			## contruieste label-ul
-			$lbl = ucfirst($val);
-			$valoare = $row[0]->{$val};
-			$string .= form_label($lbl, $val, $labels) . "\n";
-			$string .= form_checkbox($val, 1, $valoare);
-			$string .= "</div>\n";
-		}
-*/		
 		## inchide div-ul "form"
 		$string .= "</div>\n";
 		## meniuri
 		## defineste numarul de optiuni vizibile (ideal = toate)
-		$props['size'] = 8;
+		$props['size'] = 11;
 		$meniuri = $this->get_multiMeniu($row[0]->meniuri);
-		#$meniuri = array($row[0]->meniuri);
-		$string .= '<div class = "formular">' . "\n";
+		$string .= '<div class = "formular2">' . "\n";
 		$string .= form_label('Meniuri', 'meniuri', $labels) . "\n";
 		$string .= form_multiselect('meniuri[]', $meniuri['opt'], $meniuri['select'], $props);
+		$string .= "</div>\n";
+		
+		## construieste selectorul pentru mailcc
+		## defineste numarul de optiuni vizibile (ideal = toate)
+		$meniuriC = $this->get_multiMeniuC($row[0]->mailcc);
+		$string .= '<div class = "formular2">' . "\n";
+		$string .= form_label('CC Concediu', 'mailcc', $labels) . "\n";
+		$string .= form_multiselect('mailcc[]', $meniuriC['opt'], $meniuriC['select'], $props);
 		$string .= '</div><br style = "clear:left;"/><br />' . "\n";
 		
 		## sterge proprietatea "size"
@@ -334,5 +337,37 @@ class Admin extends CI_Controller {
 		
 		return $data;
 	}
+	
+	## functie pentru aducerea a doua matrici cu care se va contrui
+	## multiselect-ul pentru meniuri
+	private function get_multiMeniuC($sir){
+		## sql-ul pentru aducerea tuturor meniurilor
+		$this->db->select('id, concat(nume, " ", prenume) as ang');
+		$ids = array(3,8,6,10,15,18,19,31,34,35,50);
+		$this->db->where_in('id',$ids);
+		
+		## ruleaza interogarea
+		$rez = $this->db->get('glb_angajati');
+		
+		## introdu rezultatele intr-o matrice
+		$opt = array();
+		foreach ($rez->result() as $val){
+			
+			$opt[$val->id] = $val->ang;
+			
+		}
+		#var_dump($x);
+		## transforma sirul de optiuni selectate intr-o matrice
+		$select = explode(',', $sir);
+		
+		## genereaza matricea pentru return
+		$data = array();
+		$data['opt'] = $opt;
+		#$data['opt'] = '';
+		$data['select'] = $select;
+		
+		return $data;
+	}
+	
 	
 }

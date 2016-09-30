@@ -7,15 +7,41 @@ class Home extends CI_Controller {
 	{
 		#$this->output->enable_profiler(TRUE);
 		
-		## daca se vrea resetarea sesiunii
-		if($page == 'reset'){
+		## in functie de pagina aleasa, proceseaza
+		switch($page) {
 			
-			## distruge sesiunea
-			session_destroy();
+			## daca e vorba de prima pagina
+			case 'home':
+				
+				##verifica daca exista deja o sesiune pentru utilizator
+				if(!isset($this->session->username)){
+					## adu datele despre utilizator
+					$this->getUser();
+					
+					## acasa
+					#$this->session->mac = '12345';
+					#$this->session->chkuser = 1;
+					#$this->session->username = 'Ciprian Mic';
+					#$this->session->delegatii = 3;
+				}
+				
+				break;
 			
-			## redirectioneaza utilizatorul la pagina principala
-			redirect(base_url());
+			## daca se vrea resetarea sesiunii
+			case 'reset':
+				
+				## distruge sesiunea
+				session_destroy();
+				
+				## redirectioneaza utilizatorul la pagina principala
+				redirect(base_url());
+				
+				break;
 			
+			## daca se modifica o perioada
+			case 'mod':
+				
+				break;
 		}
 		
 		if ( ! file_exists(APPPATH.'views/'.$page.'.php'))
@@ -27,17 +53,8 @@ class Home extends CI_Controller {
 		## stabileste titlul paginii afisate
 		$data['title'] = ucfirst($page); // Capitalize the first letter
 		
-		##verifica daca exista deja o sesiune pentru utilizator
-		if(!isset($this->session->username)){
-			## adu datele despre utilizator
-			$this->getUser();
-			
-			## acasa
-			#$this->session->mac = '12345';
-			#$this->session->chkuser = 1;
-			#$this->session->username = 'Ciprian Mic';
-			#$this->session->delegatii = 3;
-		}
+		$data['liber'] = $this->getLiber();
+		$data['liberi'] = $this->getLiberI();
 		
 		## daca "utilizatorul" are drepturi de acces la aplicatie
 		if($this->session->chkuser == 1){
@@ -163,5 +180,122 @@ class Home extends CI_Controller {
 		
 	}
 	
+	## functie pentru aducerea perioadelor libere
+	private function getLiber(){
+		
+		$string = '';
+		$tip = '';
+		
+		##adu datele din DB
+		$this->db->select('liber_perioade.id,
+			liber_perioade.id_ang,
+			liber_perioade.id_inloc,
+			concat(glb_angajati.nume, " ", glb_angajati.prenume) as inloc,
+			liber_perioade.time_out,
+			liber_perioade.time_in,
+			liber_perioade.tip,
+			liber_perioade.tara,
+			liber_perioade.obs');
+		$this->db->where('id_ang', $this->session->userid);
+		$this->db->where('year(time_in) >= ', date('Y'));
+		$this->db->where('month(time_in) >= ', date('n'));
+		$this->db->where('day(time_in) >= ', date('j'));
+		$this->db->order_by('liber_perioade.time_out', 'ASC');
+		$this->db->join('glb_angajati', 'glb_angajati.id = liber_perioade.id_inloc', 'left');
+		$qry = $this->db->get('liber_perioade');
+		
+		## verifica daca exista date
+		if($qry->num_rows() == 0){
+			
+			$string = '	<tr><td colspan = "6">nu ti-ai planificat nici o perioada libera</td></tr>';
+			
+		} else {
+			
+			foreach($qry->result() as $row){
+				
+				## adu valoarea tip-ului
+				switch($row->tip){
+					case 1:
+						$tip = 'CO';
+						break;
+					case 2:
+						$tip = 'BO';
+						break;
+					case 3:
+						$tip = 'D';
+						break;
+				}
+				
+				$string .= '	<tr class = "tip' . $row->tip . '">
+			<td>' . $row->id . '</td>
+			<td>' . $tip . '</td>
+			<td>' . $row->time_out . '</td>
+			<td>' . $row->time_in . '</td>
+			<td>' . $row->inloc . '</td>
+			<td>' . $row->obs . "</td>
+		</tr>\n";
+			}
+		}
+		
+		return $string;
+	}
+	
+	## functie pentru aducerea perioadelor libere
+	private function getLiberI(){
+		
+		$string = '';
+		$tip = '';
+		
+		##adu datele din DB
+		$this->db->select('liber_perioade.id,
+			liber_perioade.id_ang,
+			liber_perioade.id_inloc,
+			concat(glb_angajati.nume, " ", glb_angajati.prenume) as ang,
+			liber_perioade.time_out,
+			liber_perioade.time_in,
+			liber_perioade.tip,
+			liber_perioade.tara,
+			liber_perioade.obs');
+		$this->db->where('id_inloc', $this->session->userid);
+		$this->db->where('year(time_in) >= ', date('Y'));
+		$this->db->where('month(time_in) >= ', date('n'));
+		$this->db->where('day(time_in) >= ', date('j'));
+		$this->db->order_by('liber_perioade.time_out', 'ASC');
+		$this->db->join('glb_angajati', 'glb_angajati.id = liber_perioade.id_ang', 'left');
+		$qry = $this->db->get('liber_perioade');
+		
+		## verifica daca exista date
+		if($qry->num_rows() == 0){
+			
+			$string = '	<tr><td colspan = "6">nu exista nici o perioada ca si inlocuitor</td></tr>';
+			
+		} else {
+			
+			foreach($qry->result() as $row){
+				
+				## adu valoarea tip-ului
+				switch($row->tip){
+					case 1:
+						$tip = 'CO';
+						break;
+					case 2:
+						$tip = 'BO';
+						break;
+					case 3:
+						$tip = 'D';
+						break;
+				}
+				
+				$string .= '	<tr class = "tip' . $row->tip . '">
+			<td>' . $row->ang . '</td>
+			<td>' . $row->time_out . '</td>
+			<td>' . $row->time_in . '</td>
+			<td>' . $row->obs . "</td>
+		</tr>\n";
+			}
+		}
+		
+		return $string;
+	}
 	
 }

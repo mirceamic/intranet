@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 #$config['base_url'] = 'http://cipacasa.go.ro/intranet_ci';
-$config['base_url'] = 'http://oradea/intranet_ci';
+$config['base_url'] = 'http://oradea/intranet';
 
 /*
 |--------------------------------------------------------------------------

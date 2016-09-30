@@ -4,5 +4,8 @@
 	<br />
 <?php echo $tabel; ?>
 	
+	<br />
+<?php echo $legenda; ?>
+	
 	<p class="footer">Page rendered in <strong>{elapsed_time}</strong> seconds.</p>
 </div>

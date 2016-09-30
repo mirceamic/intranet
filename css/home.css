@@ -1,0 +1,47 @@
+table {
+	width: 800px;
+}
+
+table,
+tr,
+th,
+td {
+	border-color: black;
+	border-width: 1px;
+	border-style: solid;
+}
+
+td {
+	text-align: center;
+}
+
+.tip1,
+.tip1 td {
+	background-color: #8BC34A;
+}
+
+.tip2,
+.tip2 td {
+	background-color: #F0E68C;
+}
+
+.tip3,
+.tip3 td {
+	background-color: #87CEEB;
+}
+
+div.legenda {
+	width: 300px;
+}
+
+div.tip1,
+div.tip2,
+div.tip3 {
+	float: left;
+	width: 150px;
+	text-align: center;
+}
+
+br.clar {
+	clear: left;
+}
