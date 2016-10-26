@@ -21,6 +21,12 @@ class Liber extends CI_Controller {
 			'tin' => 0,
 			'tout' => 1440,
 			'pauza' => 1440
+		),
+		'4' => array(
+			'class' => ' class = "zdelegatie"',
+			'tin' => 480,
+			'tout' => 1020,
+			'pauza' => 480
 		)
 	);
 	
@@ -31,6 +37,8 @@ class Liber extends CI_Controller {
 		<div class = "tip2"><a>concediu medical</a></div>
 		<br class = "clar" />
 		<div class = "tip3"><a>delegatie</a></div>
+		<br class = "clar" />
+		<div class = "tip4 w3-pale-green"><a>eveniment deosebit</a></div>
 		<br class = "clar" />
 	</div>';
 	
@@ -55,9 +63,22 @@ class Liber extends CI_Controller {
 		$linkuri = "\n\t<br />\n\t" . '<div class = "linkuri">
 	<a href = "' . base_url('index.php/liber/index/perioada') . '">Perioada noua</a><br />
 	<a href = "' . base_url('index.php/liber/index/delegatie') . '">Delegatie noua</a><br />
-	<a href = "' . base_url('index.php/liber/index/istoric') . '">Istoric</a><br />
-</div>';
+	<a href = "' . base_url('index.php/liber/index/istoric') . '">Istoric</a><br />';
 		
+		## pentru anumite persoane, mai adauga link-ul de adaugare pentru altcineva
+		switch($this->session->userid){
+			case 17:
+				
+				$linkuri .= '	<a href = "' .
+					base_url('index.php/liber/index/perioadaLipsa') .
+					'">Introdu perioada pentru altcineva</a><br />' .
+					"\n</div>";
+			break;
+			
+			default:
+				
+				$linkuri .= "\n</div>";
+		}
 		
 		## in functie de numele paginii alese, se vor rula anumite functii
 		## rezultand anumite date
@@ -84,6 +105,21 @@ class Liber extends CI_Controller {
 				
 				## construieste formularul pentru introducerea unei perioade noi
 				$data['tabel'] = $this->modForm('liber');
+				
+				## legenda nu trebuie aratata
+				$data['legenda'] = '';
+				
+				$page = 'liber';
+				
+				break;
+			
+			## daca se introduce o perioada noua pentru altcineva
+			case 'perioadaLipsa':
+				
+				$data['linkuri'] = '';
+				
+				## construieste formularul pentru introducerea unei perioade noi
+				$data['tabel'] = $this->modForm('liberLipsa');
 				
 				## legenda nu trebuie aratata
 				$data['legenda'] = '';
@@ -323,6 +359,7 @@ class Liber extends CI_Controller {
 			
 			case 'istoric':
 				
+				#$this->output->enable_profiler(TRUE);
 				## variabila care transporta formularul
 				$formStr = '';
 				## variabila care transporta tabelul
@@ -575,7 +612,8 @@ class Liber extends CI_Controller {
 		$clasa = array(
 			'1' => ' class = "zliber"',
 			'2' => ' class = "zmedical"',
-			'3' => ' class = "zdelegatie"'
+			'3' => ' class = "zdelegatie"',
+			'4' => ' class = "zdeosebit w3-pale-green"'
 		);
 		
 		
@@ -597,8 +635,8 @@ class Liber extends CI_Controller {
 			## ia fiecare zi afisata in parte si proceseaz-o
 			for($i = 0; $i <= $totalZile; $i++){
 				
-				## ziua procesata
-				$zi = $azi + $i * 86400;
+				## ziua procesata (+ 3 ore, apar probleme la schimarea orei vara/iarna)
+				$zi = $azi + $i * 86400 + 3600;
 				
 				## valori initiale
 				## daca e weekend
@@ -637,9 +675,10 @@ class Liber extends CI_Controller {
 						## valoarea care va fi afisata
 						$valori = $this->checkValoare($perioada, $zi);
 						
+						$zz = date('d-m-y', $zi);
 						## adauga datele de inceput
 						$titlu .= 'Inceput: ' . $perioada[3] . ' ' . $valori['lunai'] . ' ' .
-							$valori['orai'] . ':' . $valori['minuti'];
+							$valori['orai'] . ':' . $valori['minuti'] . ' - ' . $zz . ' ' . $zi;
 						## adauga datele de sfarsit
 						$titlu .= "\nSfarsit: " . $perioada[7] . ' ' . $valori['lunao'] . ' ' .
 							$valori['orao'] . ':' . $valori['minuto'];
@@ -688,6 +727,18 @@ class Liber extends CI_Controller {
 								
 								## adauga si destinatia
 								$titlu .= "\nDest.: " . $perioada[10];
+								
+								break;
+							
+							## evenimente deosebite
+							case '4':
+								
+								#$v = $valori['ora'];
+								$v = $this->makeEditable($id_ang, $id, $perioada[9], $valori['ora']);
+								$cls = $clasa[$perioada[9]];
+								
+								## adauga si destinatia
+								#$titlu .= "\nObs.: " . $perioada[10];
 								
 								break;
 						}
@@ -1034,6 +1085,11 @@ $(function() {
 				$formDel .= form_hidden('tara', $valmod['tara']);
 				$formDel .= form_hidden('obs', $valmod['obs']);
 				$formDel .= form_submit('sterge', 'Sterge');
+				/*$formDel .= form_submit('sterge',
+					'Sterge',
+					'onclick="this.disabled=true;
+						this.value=\'Sterg...\';
+						this.form.submit();"');*/
 				$formDel .= form_close();
 				
 				break;
@@ -1083,6 +1139,11 @@ $(function() {
 		
 		## genereaza butonul final
 		$formular .= form_submit('submit', $valmod['submit']);
+		/*$formular .= form_submit('submit',
+			$valmod['submit'],
+			'onclick="this.disabled=true;
+				this.value=\'Procesez...\';
+				this.form.submit();"');*/
 		
 		## inchide formularul
 		$formular .= form_close();
@@ -1330,13 +1391,16 @@ $(function() {
 		## matricea asta este procesata pentru afisarea rezultatelor
 		$concedii = array();
 		
+		## construieste limita superioara a perioadei, cu ore, minute si secunde
+		$ultimaZiStr = date('Y-m-d', $ultimaZi) . ' 23:59:59';
+		
 		## extrate id-urile angajatilor care au perioade libere
 		$this->db->distinct();
 		$this->db->select('liber_perioade.id_ang,
 	concat(glb_angajati.nume, " ", glb_angajati.prenume) as angajat');
 		$this->db->join('glb_angajati', 'liber_perioade.id_ang = glb_angajati.id');
 		$this->db->where('liber_perioade.time_in >', date('Y-m-d', $primaZi));
-		$this->db->where('liber_perioade.time_out <', date('Y-m-d', $ultimaZi));
+		$this->db->where('liber_perioade.time_out <', $ultimaZiStr);
 		$this->db->order_by('angajat', 'ASC');
 		$qry = $this->db->get('liber_perioade');
 		
@@ -1363,7 +1427,7 @@ $(function() {
 	liber_perioade.tara,
 	liber_perioade.obs');
 		$this->db->where('liber_perioade.time_in >', date('Y-m-d', $primaZi));
-		$this->db->where('liber_perioade.time_out <', date('Y-m-d', $ultimaZi));
+		$this->db->where('liber_perioade.time_out <', $ultimaZiStr);
 		$this->db->join('glb_angajati as ang', 'liber_perioade.id_ang = ang.id');
 		$this->db->join('glb_angajati as inloc', 'liber_perioade.id_inloc = inloc.id');
 		$this->db->order_by('zi_out', 'ASC');

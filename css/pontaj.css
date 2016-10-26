@@ -3,3 +3,73 @@
 	background-color: #8bc34a;
 }
 
+th, td {
+	margin-left: 5px;
+	margin-right: 5px;
+	border: 1px solid black;
+}
+
+.angajat {
+	/*width: 180px;*/
+	width: 200px;
+	text-align: left;
+}
+
+th.initial {
+	width: 40px;
+}
+
+td {
+	text-align: center;
+}
+
+th.pontat,
+td.pontat {
+	min-width: 40px;
+}
+
+th.liber,
+td.liber {
+	background-color: #9E9E9E;
+	width: 30px;
+}
+
+td.conm {
+	background-color: #9E9E9E;
+}
+
+/*td.pontat {
+	background-color: #00FF99;
+}*/
+/*.pontat1 {
+	background-color: #ff8888;
+}*/
+.pontat2 {
+	background-color: #ffa500;
+}
+.pontat3 {
+	background-color: #0055ff;
+}
+.nepontat {
+	background-color: #0055ff;
+}
+
+td.pontat11 {
+	background-color: #FFCC99;
+}
+td.pontat22 {
+	background-color: #999999;
+}
+td.pontat33 {
+	background-color: #666666;
+}
+
+
+
+p.footer {
+	color: black;
+}
+
+#codeigniter_profiler td{
+	text-align: left;
+}

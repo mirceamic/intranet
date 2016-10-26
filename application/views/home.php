@@ -34,6 +34,8 @@
 		<br class = "clar" />
 		<div class = "tip3"><a>delegatie</a></div>
 		<br class = "clar" />
+		<div class = "tip4"><a>eveniment deosebit</a></div>
+		<br class = "clar" />
 	</div>
 	
 	<p class="footer">Page rendered in <strong>{elapsed_time}</strong> seconds.</p>

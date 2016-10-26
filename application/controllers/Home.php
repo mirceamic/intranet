@@ -197,9 +197,7 @@ class Home extends CI_Controller {
 			liber_perioade.tara,
 			liber_perioade.obs');
 		$this->db->where('id_ang', $this->session->userid);
-		$this->db->where('year(time_in) >= ', date('Y'));
-		$this->db->where('month(time_in) >= ', date('n'));
-		$this->db->where('day(time_in) >= ', date('j'));
+		$this->db->where('time_in >= ', date('Y') . '-' . date('n') . '-'  . date('j'));
 		$this->db->order_by('liber_perioade.time_out', 'ASC');
 		$this->db->join('glb_angajati', 'glb_angajati.id = liber_perioade.id_inloc', 'left');
 		$qry = $this->db->get('liber_perioade');
@@ -223,6 +221,9 @@ class Home extends CI_Controller {
 						break;
 					case 3:
 						$tip = 'D';
+						break;
+					case 4:
+						$tip = 'CED';
 						break;
 				}
 				
@@ -257,9 +258,7 @@ class Home extends CI_Controller {
 			liber_perioade.tara,
 			liber_perioade.obs');
 		$this->db->where('id_inloc', $this->session->userid);
-		$this->db->where('year(time_in) >= ', date('Y'));
-		$this->db->where('month(time_in) >= ', date('n'));
-		$this->db->where('day(time_in) >= ', date('j'));
+		$this->db->where('time_in >= ', date('Y') . '-' . date('n') . '-'  . date('j'));
 		$this->db->order_by('liber_perioade.time_out', 'ASC');
 		$this->db->join('glb_angajati', 'glb_angajati.id = liber_perioade.id_ang', 'left');
 		$qry = $this->db->get('liber_perioade');
@@ -283,6 +282,9 @@ class Home extends CI_Controller {
 						break;
 					case 3:
 						$tip = 'D';
+						break;
+					case 4:
+						$tip = 'CED';
 						break;
 				}
 				

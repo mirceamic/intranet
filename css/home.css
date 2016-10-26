@@ -30,13 +30,19 @@ td {
 	background-color: #87CEEB;
 }
 
+.tip4,
+.tip4 td {
+	background-color: #DDFFDD;
+}
+
 div.legenda {
 	width: 300px;
 }
 
 div.tip1,
 div.tip2,
-div.tip3 {
+div.tip3,
+div.tip4 {
 	float: left;
 	width: 150px;
 	text-align: center;

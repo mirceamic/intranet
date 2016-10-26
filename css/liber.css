@@ -46,6 +46,9 @@ th.total {
 	background-color: #F0E68C;
 	text-align: center;
 }
+.zdeosebit {
+	text-align: center;
+}
 
 .datele {
 	width: 400px;
@@ -103,7 +106,8 @@ div.legenda {
 
 div.tip1,
 div.tip2,
-div.tip3 {
+div.tip3,
+div.tip4 {
 	float: left;
 	width: 150px;
 	text-align: center;
