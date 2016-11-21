@@ -180,15 +180,24 @@ class Liber extends CI_Controller {
 					case 1:
 					case 2:
 						
+						## stabileste id-ul angajatului
+						$idAng = $this->session->userid;
+						
 						## stabileste loctiitorul
 						$loct = $this->input->post('loct');
 						
 						## tara este goala pentru acest caz
 						$tara = '';
 						
+						## stabileste tipul
+						$tip = $this->input->post('tip');
+						
 						break;
 					
 					case 3:
+						
+						## stabileste id-ul angajatului
+						$idAng = $this->session->userid;
 						
 						## stabileste loctiitorul
 						$loct = '999';
@@ -202,16 +211,38 @@ class Liber extends CI_Controller {
 						
 						$tara = rtrim($tara, ',');
 						
+						## stabileste tipul
+						$tip = 3;
+						
 						break;
+						
+					case 11:
+					case 22:
+					case 33:
+						
+						## stabileste id-ul angajatului
+						$idAng = $this->input->post('ang');
+						
+						## stabileste loctiitorul
+						$loct = $this->input->post('loct');
+						
+						## tara este goala pentru acest caz
+						$tara = '';
+						
+						## stabileste tipul
+						$tip = substr($this->input->post('tip'),1,1);
+						
+						break;
+					
 				}
 				
 				## matricea de date care trebuiesc introduse in DB
 				$insertArr = array(
-					'id_ang' => $this->session->userid,
+					'id_ang' => $idAng,
 					'id_inloc' => $loct,
 					'time_out' => $dataOut,
 					'time_in' => $dataIn,
-					'tip' => $this->input->post('tip'),
+					'tip' => $tip,
 					'tara' => $tara,
 					'obs' => $this->input->post('obs')
 				);
@@ -220,19 +251,10 @@ class Liber extends CI_Controller {
 				$this->db->insert('liber_perioade', $insertArr);
 				
 				## trimite mail-ul de confirmare
-				$this->sendMail($this->session->userid,  $this->input->post('tip'), 'add', $insertArr);
+				$this->sendMail($idAng,  $tip, 'add', $insertArr);
 				
 				## afiseaza prima pagina
-				## creaza link-urile de adaugari
-				$data['linkuri'] = $linkuri;
-				
-				## afiseaza tabelul cu perioadele libere viitoare
-				$data['tabel'] = $this->makeTabel();
-				
-				## afiseaza legenda
-				$data['legenda'] = self::$legenda;
-				
-				$page = 'liber';
+				redirect(base_url('index.php/liber'));
 				
 				break;
 			
@@ -278,6 +300,8 @@ class Liber extends CI_Controller {
 						$tara = rtrim($tara, ',');
 						
 						break;
+						
+					
 				}
 				
 				## matricea de date care trebuiesc introduse in DB
@@ -299,16 +323,7 @@ class Liber extends CI_Controller {
 				$this->sendMail($this->session->userid, $this->input->post('tip'), 'mod', $updateArr);
 				
 				## afiseaza prima pagina
-				## creaza link-urile de adaugari
-				$data['linkuri'] = $linkuri;
-				
-				## afiseaza tabelul cu perioadele libere viitoare
-				$data['tabel'] = $this->makeTabel();
-				
-				## afiseaza legenda
-				$data['legenda'] = self::$legenda;
-				
-				$page = 'liber';
+				redirect(base_url('index.php/liber'));
 				
 				break;
 			
@@ -344,16 +359,7 @@ class Liber extends CI_Controller {
 				$this->db->delete('liber_perioade');
 				
 				## afiseaza prima pagina
-				## creaza link-urile de adaugari
-				$data['linkuri'] = $linkuri;
-				
-				## afiseaza tabelul cu perioadele libere viitoare
-				$data['tabel'] = $this->makeTabel();
-				
-				## afiseaza legenda
-				$data['legenda'] = self::$legenda;
-				
-				$page = 'liber';
+				redirect(base_url('index.php/liber'));
 				
 				break;
 			
@@ -536,11 +542,13 @@ class Liber extends CI_Controller {
 		$concedii = array();
 		
 		## extrate id-urile angajatilor care au perioade libere
+		## mai mari decat "azi" si mai mici decat "+30zile"
 		$this->db->distinct();
 		$this->db->select('liber_perioade.id_ang,
 	concat(glb_angajati.nume, " ", glb_angajati.prenume) as angajat');
 		$this->db->join('glb_angajati', 'liber_perioade.id_ang = glb_angajati.id');
-		$this->db->where('liber_perioade.time_in >', date('Y-m-d'));
+		$this->db->where('liber_perioade.time_in > ', date('Y-m-d'));
+		$this->db->where('liber_perioade.time_out <= ', date('Y-m-d', strtotime("+30 days")));
 		$this->db->order_by('angajat', 'ASC');
 		$qry = $this->db->get('liber_perioade');
 		
@@ -566,7 +574,8 @@ class Liber extends CI_Controller {
 	liber_perioade.tip,
 	liber_perioade.tara,
 	liber_perioade.obs');
-		$this->db->where('liber_perioade.time_in >', date('Y-m-d'));
+		$this->db->where('liber_perioade.time_in > ', date('Y-m-d'));
+		$this->db->where('liber_perioade.time_out <= ', date('Y-m-d', strtotime("+30 days")));
 		$this->db->join('glb_angajati as ang', 'liber_perioade.id_ang = ang.id');
 		$this->db->join('glb_angajati as inloc', 'liber_perioade.id_inloc = inloc.id');
 		$this->db->order_by('zi_out', 'ASC');
@@ -595,6 +604,10 @@ class Liber extends CI_Controller {
 			$concedii[$row->id_ang][$row->id] = $x;
 			
 		}
+		
+		#echo "<!--";
+		#var_dump($concedii);
+		#echo "-->";
 		
 		## proceseaza matricea de valori intr-o alta functie
 		$string .= $this->makeDataTable($concedii, $totalZile, $detaliuZile, $wend);
@@ -635,8 +648,9 @@ class Liber extends CI_Controller {
 			## ia fiecare zi afisata in parte si proceseaz-o
 			for($i = 0; $i <= $totalZile; $i++){
 				
-				## ziua procesata (+ 3 ore, apar probleme la schimarea orei vara/iarna)
-				$zi = $azi + $i * 86400 + 3600;
+				## ziua procesata (+ 1 ora, apar probleme la schimarea orei de iarna)
+				$zi = $azi + $i * 86400;
+				#$zi = $azi + $i * 86400 + 3600;
 				
 				## valori initiale
 				## daca e weekend
@@ -675,10 +689,10 @@ class Liber extends CI_Controller {
 						## valoarea care va fi afisata
 						$valori = $this->checkValoare($perioada, $zi);
 						
-						$zz = date('d-m-y', $zi);
+						$zz = date('d-m H:i:s', $zi);
 						## adauga datele de inceput
 						$titlu .= 'Inceput: ' . $perioada[3] . ' ' . $valori['lunai'] . ' ' .
-							$valori['orai'] . ':' . $valori['minuti'] . ' - ' . $zz . ' ' . $zi;
+							$valori['orai'] . ':' . $valori['minuti'];
 						## adauga datele de sfarsit
 						$titlu .= "\nSfarsit: " . $perioada[7] . ' ' . $valori['lunao'] . ' ' .
 							$valori['orao'] . ':' . $valori['minuto'];
@@ -938,7 +952,7 @@ class Liber extends CI_Controller {
 				2 => 'Concediu medical'
 			);
 			
-			$str .= form_dropdown('tip', $selectTip, $valmod['tip']);
+			$str .= form_dropdown('tip', $selectTip, 1);
 			
 			## construieste selectorul pentru inlocuitor
 			$str .= "\t<h4>Inlocuitor:</h4>\n\t";
@@ -1024,6 +1038,53 @@ class Liber extends CI_Controller {
 			$str .= "\t" . '<div id="atara">' . "\n\t\t";
 			$str .= form_checkbox('tari[]','Ungaria-Aeroport',FALSE,'style = "width: 200px"');
 			$str .= "Ungaria-Aeroport</div>\n";
+			
+		} elseif($tip == 'liberLipsa'){
+			
+			## extrage angajatii din DB
+			$this->db->select('id, concat(nume, ", ", prenume) as ang');
+			$this->db->where('inlocuitor > ', 0);
+			$this->db->order_by('inlocuitor');
+			$qry = $this->db->get('glb_angajati');
+			
+			## populeaza matricea pentru selector
+			$selectInloc = array();
+			
+			foreach($qry->result() as $row){
+				$selectInloc[$row->id] = $row->ang;
+			}
+			
+			## construieste selectorul pentru beneficiarul perioadei
+			$str .= "\t<h4>Angajat:</h4>\n\t";
+			$str .= form_dropdown('ang', $selectInloc);
+			
+			$selectOra = array(
+				'08' => '08',
+				'09' => '09',
+				'10' => '10',
+				'11' => '11',
+				'12' => '12',
+				'13' => '13',
+				'14' => '14',
+				'15' => '15',
+				'16' => '16',
+				'17' => '17'
+			);
+			
+			## construieste selectorul tipului de perioada libera
+			$str .= "\n\t<h4>Tipul perioadei:</h4>\n\t";
+			
+			$selectTip = array(
+				11 => 'Concediu de odihna',
+				22 => 'Concediu medical',
+				33 => 'Delegatie'
+			);
+			
+			$str .= form_dropdown('tip', $selectTip, 11);
+			
+			## construieste selectorul pentru inlocuitor
+			$str .= "\t<h4>Inlocuitor:</h4>\n\t";
+			$str .= form_dropdown('loct', $selectInloc,$valmod['inloc']);
 			
 		}
 		
@@ -1200,6 +1261,28 @@ $(function() {
 				
 				break;
 			
+			case 11:
+			case 22:
+				
+				$titlu = 'Concediu';
+				$descr .= ' un concediu';
+				$col = 'mailcc';
+				$observatii = ".\nObservatii: " . $valori['obs'];
+				$observatii .= "\n(introdus de " . $this->session->username . ")";
+				
+				break;
+				
+			case 33:
+				
+				$titlu = 'Delegatie';
+				$descr .= ' o delegatie';
+				$col = 'dlgcc';
+				$observatii = ".\nDestinatie: " . $valori['tara']
+					. ".\nObservatii: " . $valori['obs'];
+				$observatii .= "\n(introdus de " . $this->session->username . ")";
+				
+				break;
+				
 		}
 		
 		$from = 'postmaster@astormueller.ro';
@@ -1212,7 +1295,7 @@ $(function() {
 		
 		## afla datele necesare despre angajat
 		## afla id-urile la care "mai" trebuie trimis mail-ul
-		$this->db->select('user, ' . $col);
+		$this->db->select('user, nume, prenume, ' . $col);
 		$this->db->where('id', $id);
 		$qry = $this->db->get('glb_angajati');
 		$row = $qry->row();
@@ -1267,11 +1350,14 @@ $(function() {
 		## adresele din BCC
 		$this->email->bcc('cimi@astormueller.ro');
 		
+		## afla numele "beneficiarului"
+		
+		
 		## subiectul mail-ului
-		$this->email->subject($this->session->username . $descr);
+		$this->email->subject($row->nume . ' ' . $row->prenume . $descr);
 		
 		## continutul mail-ului
-		$emailMsg = $this->session->username . $descr .
+		$emailMsg = $row->nume . ' ' . $row->prenume . $descr .
 			" cu urmatoarele date:\nData de inceput: " .
 			$valori['time_out'] .
 			"\nData de sfarsit: " .
@@ -1473,7 +1559,8 @@ $(function() {
 		$clasa = array(
 			'1' => ' class = "zliber"',
 			'2' => ' class = "zmedical"',
-			'3' => ' class = "zdelegatie"'
+			'3' => ' class = "zdelegatie"',
+			'4' => ' class = "zdeosebit"'
 		);
 		
 		## initializeaza variabila de transport
@@ -1548,6 +1635,7 @@ $(function() {
 							case '1':
 							## concediu medical
 							case '2':
+							case '4':
 								
 								## verifica daca e weekend
 								if(in_array($i, $wend)){

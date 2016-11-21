@@ -100,6 +100,7 @@ class Home extends CI_Controller {
 				concat(prenume, ", ", nume) as nume,
 				delegatii,
 				id_dep,
+				id_pontaj,
 				meniuri
 			from glb_angajati
 			where inactiv = 0
@@ -118,6 +119,7 @@ class Home extends CI_Controller {
 		if (isset($row)){
 			$this->session->chkuser = 1;
 			$this->session->userid = $row->id;
+			$this->session->pontajid = $row->id_pontaj;
 			$this->session->username = $row->nume;
 			#$this->session->delegatii = $row->delegatii;
 			

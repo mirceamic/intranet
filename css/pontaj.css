@@ -10,8 +10,8 @@ th, td {
 }
 
 .angajat {
-	/*width: 180px;*/
-	width: 200px;
+	width: 180px;
+	/*width: 200px;*/
 	text-align: left;
 }
 
@@ -64,6 +64,40 @@ td.pontat33 {
 	background-color: #666666;
 }
 
+.init{
+	width: 800px;
+}
+
+.date{
+	width: 1000px;
+}
+
+td.total {
+	font-weight: bold;
+	text-align: right;
+	padding-right: 10px;
+}
+td.totalc {
+	font-weight: bold;
+}
+
+.inputAdd{
+	width: 50px;
+}
+
+.labelAdd{
+	float: left;
+	width: 80px;
+	text-align: center;
+}
+.labelAddTxt{
+	float: left;
+	text-align: center;
+}
+
+.clear{
+	clear: left;
+}
 
 
 p.footer {

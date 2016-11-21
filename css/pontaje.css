@@ -1,0 +1,41 @@
+.init{
+	width: 800px;
+}
+
+.date{
+	width: 1000px;
+}
+
+table.tabel,
+.tabel th,
+.tabel td {
+	border: 1px solid black;
+	text-align: center;
+}
+
+.small {
+	width: 100px;
+}
+.zitip {
+	width: 50px;
+}
+
+.big {
+	width: 300px;
+}
+
+td.liber {
+	background-color: #EEEEEE;
+}
+td.nemotivat {
+	background-color: #aaaaaa;
+}
+
+td.total {
+	font-weight: bold;
+	text-align: right;
+	padding-right: 10px;
+}
+td.totalc {
+	font-weight: bold;
+}

@@ -1,14 +1,8 @@
 <div id="container">
-	<h3>Pontaj</h3>
+	<h3><?php echo $title; ?></h3>
 	<br />
-
-<?php echo $selector; ?>
-	
 	<br />
-<?php echo $pontaj; ?>
-	
-<?php echo $export; ?>
-
+<?php echo $formular; ?>
 	
 	<p class="footer">Page rendered in <strong>{elapsed_time}</strong> seconds.</p>
 </div>
