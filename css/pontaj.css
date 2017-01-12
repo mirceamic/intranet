@@ -53,15 +53,22 @@ td.conm {
 .nepontat {
 	background-color: #0055ff;
 }
-
+td.medical {
+	background-color: #F0E68C;
+}
 td.pontat11 {
 	background-color: #FFCC99;
 }
 td.pontat22 {
 	background-color: #999999;
 }
+td.pontat11i,
+td.pontat22i {
+	/*background-color: #eceb8f;*/
+	background-color: #f8f76b;
+}
 td.pontat33 {
-	background-color: #666666;
+	background-color: #000000;
 }
 
 .init{

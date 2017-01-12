@@ -7,8 +7,12 @@
 	<br />
 <?php echo $pontaj; ?>
 	
-<?php echo $export; ?>
+<?php #echo $export; ?>
+	
+	<!--
+<?php echo $insertDB; ?>
 
+	-->
 	
 	<p class="footer">Page rendered in <strong>{elapsed_time}</strong> seconds.</p>
 </div>

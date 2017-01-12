@@ -32,7 +32,7 @@ class Liber extends CI_Controller {
 	
 	private static $legenda = '	<div class = "legenda">
 		<h5>Legenda</h5>
-		<div class = "tip1"><a>perioada libera</a></div>
+		<div class = "tip1"><a>concediu de odihna</a></div>
 		<br class = "clar" />
 		<div class = "tip2"><a>concediu medical</a></div>
 		<br class = "clar" />
@@ -68,6 +68,10 @@ class Liber extends CI_Controller {
 		## pentru anumite persoane, mai adauga link-ul de adaugare pentru altcineva
 		switch($this->session->userid){
 			case 17:
+			case 31: #dana
+			case 50: #iulia
+			case 52: #octavian
+			case 15: #loredana
 				
 				$linkuri .= '	<a href = "' .
 					base_url('index.php/liber/index/perioadaLipsa') .
@@ -214,10 +218,32 @@ class Liber extends CI_Controller {
 						## stabileste tipul
 						$tip = 3;
 						
+						## verifica daca trebuiesc adaugate zilele libere
+						## daca delegatia ajunge in weekend
+						$this->verificaDelegatia($this->session->userid,
+							$this->input->post('from'),
+							$this->input->post('to'));
+						
 						break;
 						
 					case 11:
 					case 22:
+						
+						## stabileste id-ul angajatului
+						$idAng = $this->input->post('ang');
+						
+						## stabileste loctiitorul
+						$loct = $this->input->post('loct');
+						
+						## tara este goala pentru acest caz
+						$tara = '';
+						
+						## stabileste tipul
+						$tip = substr($this->input->post('tip'),1,1);
+						
+						break;
+					
+					## pentru delegatii trebuie verificata perioada pentru weekend-uri
 					case 33:
 						
 						## stabileste id-ul angajatului
@@ -231,6 +257,12 @@ class Liber extends CI_Controller {
 						
 						## stabileste tipul
 						$tip = substr($this->input->post('tip'),1,1);
+						
+						## verifica daca trebuiesc adaugate zilele libere
+						## daca delegatia ajunge in weekend
+						$this->verificaDelegatia($this->input->post('ang'),
+							$this->input->post('from'),
+							$this->input->post('to'));
 						
 						break;
 					
@@ -250,7 +282,7 @@ class Liber extends CI_Controller {
 				## introdu datele in DB
 				$this->db->insert('liber_perioade', $insertArr);
 				
-				## trimite mail-ul de confirmare
+/*mark*/				## trimite mail-ul de confirmare
 				$this->sendMail($idAng,  $tip, 'add', $insertArr);
 				
 				## afiseaza prima pagina
@@ -531,6 +563,12 @@ class Liber extends CI_Controller {
 			}
 			
 		}
+		
+		## completeaza zilele de weekend cu zilele libere oficiale
+		## adu anul curent
+		$an = date('Y');
+		
+		$wend = $this->getZileLibere($an, $wend);
 		
 		## inchide tr-ul capului de tabel
 		$string .= "\n\t</tr>\n";
@@ -1016,7 +1054,11 @@ class Liber extends CI_Controller {
 				'Portugalia',
 				'Franta',
 				'Elvetia',
-				'Rusia'
+				'Rusia/Ucraina',
+				'Slovenia',
+				'Bosnia',
+				'Lituania',
+				'Moldova'
 			);
 			
 			$str .= "\t<h4>Destinatie</h4>\n";
@@ -1044,7 +1086,8 @@ class Liber extends CI_Controller {
 			## extrage angajatii din DB
 			$this->db->select('id, concat(nume, ", ", prenume) as ang');
 			$this->db->where('inlocuitor > ', 0);
-			$this->db->order_by('inlocuitor');
+			#$this->db->order_by('inlocuitor');
+			$this->db->order_by('nume');
 			$qry = $this->db->get('glb_angajati');
 			
 			## populeaza matricea pentru selector
@@ -1685,6 +1728,73 @@ $(function() {
 		}
 		
 		return $string;
+	}
+	
+	## functie pentru aducerea zilelor libere oficiale
+	private function getZileLibere($an, $wend){
+		
+		## matricea zilelor libere
+		$x = array();
+		
+		## zilele limita afisate
+		$azi = date('Y-m-d');
+		$ultimazi = date('Y-m-d', strtotime("+30 days"));
+		
+		$this->db->where('YEAR(zi)',$an);
+		$qry = $this->db->get('pnt_libere');
+		
+		foreach($qry->result() as $vals){
+			
+			## verifica daca e in perioada afisata
+			if ($vals->zi >= $azi && $vals->zi <= $ultimazi){
+				
+				## verifica daca perioada libera e in weekend
+				#*f()
+				#$ziua = date('d', $vals->zi);
+			}
+			
+			$x[$vals->zi] = array($vals->descriere);
+		}
+		
+		return $wend;
+	}
+	
+	
+	## functie pentru verificarea delegatiilor si adaugarea de perioade libere daca D este in weekend
+	private function verificaDelegatia($id, $from, $to){
+		
+		## transforma datele din string in date()
+		$fromT = strtotime($from);
+		$toT = strtotime($to);
+		
+		for($i = $fromT; $i <= $toT; $i += 86400){
+			
+			## extrage componentele datei
+			$an = date('Y', $i);
+			$luna = date('m', $i);
+			$zi = date('d', $i);
+			
+			## verifica daca e in weekend
+			if(date('N', $i) == '6' || date('N', $i) == '7'){
+				
+				## scrie data ca si perioada libera
+				## matricea de insert
+				$insert = array(
+					'perioada' => $an . $luna,
+					'cod_pontaj' => $id,
+					'zile' => 1,
+					'minute' => 0,
+					'dlg' => 1,
+					'obs' => "delegatie (a), pentru $zi.$luna",
+					'operator' => $this->session->username,
+					'opmac' => $this->session->mac,
+					'opdata' => date('Y-m-d H-i')
+				);
+				
+				$this->db->insert('pnt_concediu', $insert);
+				
+			}
+		}
 	}
 	
 }

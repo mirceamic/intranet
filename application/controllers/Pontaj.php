@@ -89,6 +89,7 @@ class Pontaj extends CI_Controller {
 		
 		## adu concediile initiale
 		$concedii = $this->aduConcediiInit($an, $luna);
+		$concediiCD = $this->aduConcediiInitCD($an, $luna);
 		
 		## adu zilele luate liber
 		$zConcedii = $this->aduConcedii($idCI, $an, $luna);
@@ -102,7 +103,10 @@ class Pontaj extends CI_Controller {
 		$this->db->order_by('nume', 'ASC');
 		$qry = $this->db->get('glb_angajati');
 		
-		$data['export'] = '<!--';
+		#$data['export'] = '<!--';
+		
+		## initializeaza valorile pentru concediul final/init (pt luna urmatoare)
+		$data['insertDB'] = 'insert into pnt_concediu (perioada, cod_pontaj, zile, minute, dlg, obs, operator, opmac, opdata) values';
 		
 		## ia fiecare angajat si extrage datele specifice
 		foreach($qry->result() as $valAng){
@@ -124,16 +128,19 @@ class Pontaj extends CI_Controller {
 				$liberAng = 0;
 			}
 			
-			## verifica daca exista concediu initial pentru angajatul procesat
-			if(array_key_exists($valAng->cod_pontator, $concedii)){
-				$zile = $concedii[$valAng->cod_pontator][0];
-				$ore = floor($concedii[$valAng->cod_pontator][1] / 60);
-				$minute = $concedii[$valAng->cod_pontator][1] - $ore * 60;
+			if(array_key_exists($valAng->id, $concedii)){
+				
+				$zile = intval($concedii[$valAng->id][0]);
+				$ore = intval(floor($concedii[$valAng->id][1] / 60));
+				$minute = intval($concedii[$valAng->id][1] - $ore * 60);
 				
 				$cellTitle = $ore . ':' . $minute;
 				
 				## valoarea, in minute, a perioadei libere a angajatului
-				$concFinal = $zile * 480 + $minute;
+				$concFinal = $zile * 480 + $ore * 60 + $minute;
+				
+				## diferenta de pontaj, pentru calcularea zilelor libere
+				$diffCalcul = 480 - $concedii[$valAng->id][1];
 				
 			## daca nu exista inregistrari, stabileste valorile implicite
 			} else {
@@ -142,10 +149,9 @@ class Pontaj extends CI_Controller {
 				$minute = '&nbsp';
 				$cellTitle = 'nu exista concediu initial';
 				$concFinal = 0;
+				
+				$diffCalcul = 0;
 			}
-			
-			## initializeaza diferenta de pontaj, pentru calcularea zilelor libere
-			$diffCalcul = 0;
 			
 			## string-ul pentru link-ul angajatului
 			$linkAng = array(
@@ -208,7 +214,7 @@ class Pontaj extends CI_Controller {
 						case 0:
 							
 							$valPontajAf = $this->validarePontaj($pontajAng, $i, $diffCalcul, $valAng->id);
-							
+							#var_dump($valPontajAf);
 							$diffCalcul = $valPontajAf['diffCalc'];
 							
 							switch($valPontajAf['validare']){
@@ -232,7 +238,7 @@ class Pontaj extends CI_Controller {
 							
 							$diffZi = $diffZi + $valPontajAf['diff'];
 							
-							$data['export'] .= $valPontajAf['export'];
+							#$data['export'] .= $valPontajAf['export'];
 							
 							break;
 					}
@@ -245,7 +251,6 @@ class Pontaj extends CI_Controller {
 				$titlu .= "\ndifZi " . $diffZi;
 				$titlu .= "\ndifCalc " . $diffCalcul;
 				$titlu .= "\ndifTotal " . $concFinal . '"';
-				#var_dump($titlu);
 				
 				## scrie celula conform datelor calculate
 				$data['pontaj'] .= '<td'. $clasa . $titlu . '>' . $valoare . "</td>\n";
@@ -263,12 +268,20 @@ class Pontaj extends CI_Controller {
 			$data['pontaj'] .= "<td class = \"diff\">" . $fOre . "</td>\n";
 			$data['pontaj'] .= "<td class = \"diff\">" . $fMinute . "</td>\n";
 			
-			$data['export'] .= "\n";
+			#$data['export'] .= "\n";
+			
+			$fMinuteTotal = $fOre * 60 + $fMinute;
+			## scrie datele pentru importul in DB
+			$data['insertDB'] .= "\n(" . $an . $this->corecteazaInt($luna + 1) . ',' .
+				$valAng->id . ',' .
+				$fZile . ',' .
+				$fMinuteTotal . ',0,"init","DBinit","local","' .
+				date("Y-m-d H:i") . '"),';
 			
 		}
 		
 		## inchide export-ul de date
-		$data['export'] .= "\n-->";
+		#$data['export'] .= "\n-->";
 		
 		## inchide tabela
 		$data['pontaj'] .= "</table>\n";
@@ -362,7 +375,7 @@ class Pontaj extends CI_Controller {
 			$linkAdaugare .= "\n\t<br />\n\t" .
 				'<a href = "' .
 				site_url($elemente) .
-				'">Adauga perioada initiala</a>' .
+				'">Adauga perioada suplimentara</a>' .
 				"\n<br />";
 			
 			
@@ -563,6 +576,14 @@ class Pontaj extends CI_Controller {
 		$data['formular'] .= form_input($camp);
 		$data['formular'] .= "<br /><br />\n";
 		
+		## radio - tipul perioadei introduse
+		
+		$data['formular'] .= form_radio('dlg', 0) . 'Concediu<br />';
+		$data['formular'] .= form_radio('dlg', 1, TRUE) . 'Delegatie<br />';
+		$data['formular'] .= form_radio('dlg', 2) . 'Overtime<br /><br />';
+		
+		## observatii
+		
 		$camp = array(
 			'name'	=> 'obs',
 			'id'	=> 'obs',
@@ -621,6 +642,7 @@ class Pontaj extends CI_Controller {
 				'cod_pontaj'	=> $this->input->post('id'),
 				'zile'			=> intval($y['zile']),
 				'minute'		=> $minute,
+				'dlg'			=> $this->input->post('dlg'),
 				'obs'			=> $this->input->post('obs'),
 				'operator'		=> $this->session->username,
 				'opmac'			=> $this->session->mac,
@@ -716,6 +738,9 @@ class Pontaj extends CI_Controller {
 	<tr>
 ';
 		
+		## initializeaza variabila pentru stil, in cazul in care este zi libera
+		$stil = '';
+		
 		## construieste capul de tabel cu numarul de zile din luna selectata
 		for($y = 1; $y <= $nrZile; $y++){
 			
@@ -751,12 +776,17 @@ class Pontaj extends CI_Controller {
 		## ziua in format unix time
 		## dupa ora 12 ar trebui sa fie importate pontajele de ziua anterioara
 		## astfel incat se poate lua in considerare si ziua anterioara
-		$zu = mktime(11, 20, 0, $luna, $zi, $an);
+		#$zu = mktime(11, 20, 0, $luna, $zi, $an);
+		
+		## p.s. in cazul in care se face mai repede actualizarea, ziua de referinta (azi) se pune la o ora anterioara actualizarii
+		$zu = mktime(8, 0, 0, $luna, $zi, $an);
+		
 		## pt ziua din saptamana
 		$zs = date('w', $zu);
 		## pentru afisarea cat mai corecta, timpul de referinta pentru "zi din viitor"
 		## va fi considerat cu 12 de ore in urma
-		$viitor = time() - (12 * 60 * 60);
+		#$viitor = time() - (12 * 60 * 60);
+		$viitor = time();
 		
 		## adauga un 0 pentru zile "mici"
 		if(strlen($zi) == 1){
@@ -797,7 +827,7 @@ class Pontaj extends CI_Controller {
 		$this->db->select('distinct(id_ang) as ids');
 		$this->db->where('YEAR(data)', $an);
 		$this->db->where('MONTH(data)', $luna);
-		#$this->db->where('id_ang', 9);
+		#$this->db->where('id_ang', 11);
 		$this->db->where_not_in('id_ang', $idNU);
 		$qry = $this->db->get('pnt_pontari2016');
 		
@@ -841,6 +871,30 @@ class Pontaj extends CI_Controller {
 		foreach($qry->result() as $vals){
 			
 			$x[$vals->cod_pontaj] = array(
+				$vals->z,
+				$vals->m
+			);
+		}
+		
+		return $x;
+		
+	}
+	
+	## functie pentru aducerea concediilor initiale
+	private function aduConcediiInitCD($an, $luna){
+		
+		## matricea de transport
+		$x = array();
+		
+		$perioada = $an . $luna;
+		$this->db->select('cod_pontaj, dlg, sum(minute) as m, sum(zile) as z');
+		$this->db->where('perioada', $perioada);
+		$this->db->group_by('cod_pontaj');
+		$this->db->group_by('dlg');
+		$qry = $this->db->get('pnt_concediu');
+		foreach($qry->result() as $vals){
+			
+			$x[$vals->cod_pontaj][$vals->dlg] = array(
 				$vals->z,
 				$vals->m
 			);
@@ -1117,6 +1171,7 @@ class Pontaj extends CI_Controller {
 					$x['valoare'] = 'CO';
 					$x['diff'] = 480;
 					$x['clasa'] = ' w3-pale-green"';
+					#$x['clasa'] = ' pontaj"';
 					
 					break;
 					
@@ -1125,6 +1180,7 @@ class Pontaj extends CI_Controller {
 					$x['valoare'] = 'CM';
 					$x['diff'] = 0;
 					$x['clasa'] = ' w3-pale-green"';
+					#$x['clasa'] = ' medical"';
 					
 					break;
 					
@@ -1229,7 +1285,7 @@ class Pontaj extends CI_Controller {
 			$keyIn = count($in);
 			$keyOut = count($out);
 			
-			$x['export'] = '';
+#$x['export'] = '';
 			## exporta intrarile si iesirile (viitor export excel)
 			foreach($in as $cheie => $valIn){
 				
@@ -1240,7 +1296,7 @@ class Pontaj extends CI_Controller {
 					$valOut = 0;
 				}
 				
-				$x['export'] .= $idAng . ',' . $valIn . ',' . $valOut . "\n";
+				#$x['export'] .= $idAng . ',' . $valIn . ',' . $valOut . "\n";
 			}
 			
 			## verifica daca numarul cheilor este identic
@@ -1349,7 +1405,13 @@ class Pontaj extends CI_Controller {
 						
 						## zi libera calculata
 						$valAfisare = 'CO';
-						$x['clasa'] .= '"pontat22 w3-dark-grey"';
+						
+						## verifica daca s-a intarziat mai putin de 5 minute
+						if($tIntrare > 480 && $tIntrare <= 485){
+							$x['clasa'] .= '"pontat22i"';
+						}else{
+							$x['clasa'] .= '"pontat22 w3-dark-grey"';
+						}
 						
 						## reseteaza valoarea diferentei de calcul
 						$diffCalcul = $diffCalcul - 480;
@@ -1358,7 +1420,14 @@ class Pontaj extends CI_Controller {
 						
 						## zi libera calculata
 						$valAfisare = '8';
-						$x['clasa'] .= '"pontat11"';
+						
+						## verifica daca s-a intarziat mai putin de 5 minute
+						if($tIntrare > 480 && $tIntrare <= 485){
+							$x['clasa'] .= '"pontat11i"';
+						}else{
+							$x['clasa'] .= '"pontat11"';
+						}
+						
 						
 					}
 					
@@ -1981,19 +2050,38 @@ class Pontaj extends CI_Controller {
 			$liberRamas = $this->faTimpAng($liber, 'zhm');
 			
 			## scrie totalul zilei
-			$tmp['string'] .= "<tr>\n\t" . '<td colspan = "4" class = "total">Total:</td>';
-			$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $this->faTimpAng($prz, 'hm') . '</td>';
-			$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['zile'] . '</td>';
-			$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['ore'] . '</td>';
-			$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['minute'] . "</td>\n</tr>";
+			#$tmp['string'] .= "<tr>\n\t" . '<td colspan = "4" class = "total">Total:</td>';
+			#$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $this->faTimpAng($prz, 'hm') . '</td>';
+			#$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['zile'] . '</td>';
+			#$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['ore'] . '</td>';
+			#$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['minute'] . "</td>\n</tr>";
 			
 			
 		## daca nu exista pontari => nemotivat
 		} else {
-			$tmp['string'] .= '<tr><td class = "liber">' . $zi .
-				'</td><td colspan = "9" class = "nemotivat">N (nu exista pontari sau perioade libere)</td></tr>';
+			$tmp['string'] .= '<tr><td class = "liber" rowspan = "2">' . $zi . '</td>
+				<td rowspan = "2">N</td>
+				<td colspan = "4" class = "nemotivat">N (nu exista pontari sau perioade libere)</td>
+				<td colspan = "4">&nbsp;</td>';
+			
+			## calculeaza diferenta zilnica
+			$diff = 480 - $prz;
+			
+			$liber = $liber - $diff;
+			
+			## extrage valorile de afisat ale concediului ramas
+			$liberRamas = $this->faTimpAng($liber, 'zhm');
+			
 		}
 		
+		## scrie totalul zilei
+		$tmp['string'] .= "<tr>\n\t" . '<td colspan = "4" class = "total">Total:</td>';
+		$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $this->faTimpAng($prz, 'hm') . '</td>';
+		$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['zile'] . '</td>';
+		$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['ore'] . '</td>';
+		$tmp['string'] .= "\n\t" . '<td class = "totalc">' . $liberRamas['minute'] . "</td>\n</tr>";
+		
+		## diferenta 
 		$tmp['diff'] = $diff;
 		
 		return $tmp;

@@ -661,7 +661,7 @@ class Pontaje extends CI_Controller {
 			sort($out, SORT_STRING);
 			
 			## extrage prima intrare a zilei
-			$firstIn = $in[0];
+			$firstIn = $this->verTIn($in[0]);
 			
 			
 			## pentru fiecare valoare din matricea de intrare, scrie un rand de valori
@@ -809,19 +809,48 @@ class Pontaje extends CI_Controller {
 						
 					break;
 					
-					/*## daca s-a intrat pana la 8:30
+					## daca s-a intrat pana la 8:30
 					case $tin <= 510:
 						
-						$limita = 1050;
-						
-					break;*/
-					
-					## daca nu se indeplineste nici una din conditii, limita este normala
-					default:
-						
-						$limita = 1050;
+						## daca iesirea e inainte de 17:30
+						## (nu a recuparat jumatatea de ora)
+						if($tout >= 1020 && $tout < 1050){
+							
+							$limita = 1020;
+							
+						} else {
+							
+							$limita = 1050;
+							
+						}
 						
 					break;
+					
+					## daca s-a intrat de la 8:30 la 8:45 => exista posibilitatea de recuperare a primelor 30 minute
+					case ($tin > 510 && $tin <= 525):
+						
+						## daca iesirea e dupa 17:30
+						if($tout >= 1050){
+							
+							$limita = 1050;
+							
+						## daca iesirea e inainte de 17:30
+						} else {
+							
+							$limita = 1020;
+							
+						}
+						
+					break;
+						
+					## daca nu se indeplineste nici una din conditii, limita este normala
+					#default:
+					case $tin > 525:
+						
+						$limita = 1020;
+						
+					break;
+					
 				}
 				
 			break;
@@ -983,6 +1012,20 @@ class Pontaje extends CI_Controller {
 		}
 		
 		return $x;
+	}
+	
+	## functie pentru verificarea primului timp de intrare
+	private function verTIn($in){
+		
+		## extrage orele si minutele
+		$ora = intval(substr($in,11,2));
+		$minut = intval(substr($in,14,2));
+		
+		## construieste valorile pentru minute
+		$time = $ora * 60 + $minut;
+		
+		return $time;
+		
 	}
 	
 }
