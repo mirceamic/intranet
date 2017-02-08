@@ -672,7 +672,14 @@ class Pontaje extends CI_Controller {
 				
 				## calculeaza intrarea
 				$mIn = $this->extractData($vals, 'mc');
-				$timeInCalculat = $this->verificaTIn($mIn);
+								
+				#$timeInCalculat = $this->verificaTIn($mIn);
+				## verifica daca e in cele 5 minute permise
+				if($mIn >= 480 && $mIn <= 485){
+					$timeInCalculat = 480;
+				} else {
+					$timeInCalculat = $this->verificaTIn($mIn);
+				}
 				
 				## verifica daca exista cheie pentru iesire
 				if(array_key_exists($key, $out)){

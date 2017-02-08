@@ -272,7 +272,7 @@ class Pontaj extends CI_Controller {
 			
 			$fMinuteTotal = $fOre * 60 + $fMinute;
 			## scrie datele pentru importul in DB
-			$data['insertDB'] .= "\n(" . $an . $this->corecteazaInt($luna + 1) . ',' .
+			$data['insertDB'] .= "\n<br>(" . $an . $this->corecteazaInt($luna + 1) . ',' .
 				$valAng->id . ',' .
 				$fZile . ',' .
 				$fMinuteTotal . ',0,"init","DBinit","local","' .
@@ -372,13 +372,28 @@ class Pontaj extends CI_Controller {
 				$perioada
 			);
 			
+			## construieste an.luna pentru care se va adauga overtime
+			$ladaugare = $luna + 1;
+			$perioada = $an . $ladaugare;
+			
+			## elementele link-ului
+			$elementeo = array(
+				'index.php',
+				'pontaj',
+				'addo',
+				$idAng,
+				$idPontaj,
+				$perioada
+			);
 			$linkAdaugare .= "\n\t<br />\n\t" .
 				'<a href = "' .
 				site_url($elemente) .
 				'">Adauga perioada suplimentara</a>' .
+				"\n<br />" .
+				'<a href = "' .
+				site_url($elementeo) .
+				'">Adauga overtime</a>' .
 				"\n<br />";
-			
-			
 			
 		} else {
 			$linkAdaugare = '';
@@ -415,7 +430,7 @@ class Pontaj extends CI_Controller {
 			## initializeaza diferenta zilnica - timpul care se scade din concediu
 			$diffZilnic = 0;
 			
-			## da nu trebuie procesata
+			## daca nu trebuie procesata
 			if($verZi == 1){
 				
 				## scrie un rand gol
@@ -579,8 +594,84 @@ class Pontaj extends CI_Controller {
 		## radio - tipul perioadei introduse
 		
 		$data['formular'] .= form_radio('dlg', 0) . 'Concediu<br />';
-		$data['formular'] .= form_radio('dlg', 1, TRUE) . 'Delegatie<br />';
-		$data['formular'] .= form_radio('dlg', 2) . 'Overtime<br /><br />';
+		$data['formular'] .= form_radio('dlg', 1, TRUE) . 'Delegatie<br /><br />';
+		
+		## observatii
+		
+		$camp = array(
+			'name'	=> 'obs',
+			'id'	=> 'obs',
+			'rows'	=> '3',
+			'cols'	=> '40'
+		);
+		
+		$data['formular'] .= form_label('Observatii', 'obs', 'class = "labelAddTxt"');
+		$data['formular'] .= '<br class = "clear" />';
+		$data['formular'] .= form_textarea($camp);
+		$data['formular'] .= "<br /><br />\n";
+		
+		## restul form-ului
+		$data['formular'] .= form_submit('submit','Adauga');
+		$data['formular'] .= form_close();
+		
+		## stabileste titlul paginii afisate
+		$data['title'] = 'Adauga perioada pentru ' . $angajat;
+		
+		## incarca pagina de afisat
+		$this->load->view('header', $data);
+		$this->load->view($page);
+		$this->load->view('footer');
+	}
+	
+	## functie pentru adaugarea unei perioade de overtime
+	public function addo($idAng, $idPontaj, $perioada){
+		
+		## optiuni de debugging
+		#$this->output->enable_profiler(TRUE);
+		
+		$page = 'individualAdd';
+		
+		## adu numele angajatului
+		$this->db->select('nume, prenume');
+		$this->db->where('id', $idAng);
+		$qry = $this->db->get('glb_angajati');
+		$row = $qry->row();
+		$angajat = $row->nume . ' ' . $row->prenume;
+		
+		## construieste formularul de introdus perioada
+		$formLink = 'index.php/pontaj/done';
+		$data['formular'] = form_open($formLink);
+		
+		## valorile ascunse
+		$data['formular'] .= form_hidden('id', $idAng);
+		$data['formular'] .= form_hidden('id_pontaj', $idPontaj);
+		$data['formular'] .= form_hidden('perioada', $perioada);
+		$data['formular'] .= form_hidden('dlg', 2);
+		
+		## afiseaza denumirile campurilor
+		$data['formular'] .= '<div class = "labelAdd">' . form_label('Zile', 'zile') .
+			"</div>\n" . '<div class = "labelAdd">' . form_label('Ore', 'ore') .
+			"</div>\n" . '<div class = "labelAdd">' . form_label('Minute', 'minute') .
+			"</div>\n" . '<br class = "clear" />';
+		
+		## datele pentru campuri
+		$camp = array(
+			'name'	=> 'zile',
+			'id'	=> 'zile',
+			'size'	=> '5'
+		);
+		
+		## datele de introdus
+		$data['formular'] .= form_input($camp);
+		
+		$camp['name'] = 'ore';
+		$camp['id'] = 'ore';
+		$data['formular'] .= form_input($camp);
+		
+		$camp['name'] = 'minute';
+		$camp['id'] = 'minute';
+		$data['formular'] .= form_input($camp);
+		$data['formular'] .= "<br /><br />\n";
 		
 		## observatii
 		
@@ -827,7 +918,7 @@ class Pontaj extends CI_Controller {
 		$this->db->select('distinct(id_ang) as ids');
 		$this->db->where('YEAR(data)', $an);
 		$this->db->where('MONTH(data)', $luna);
-		#$this->db->where('id_ang', 11);
+		#$this->db->where('id_ang', 45);
 		$this->db->where_not_in('id_ang', $idNU);
 		$qry = $this->db->get('pnt_pontari2016');
 		
@@ -1001,8 +1092,14 @@ class Pontaj extends CI_Controller {
 				for($i = $ziO; $i <= $ziI; $i++){
 					
 					## initializeaza sub-matricile de transport
+					## se introduc si valori initale deoarece apar probleme la CO care
+					## incepe la alta ora decat 8:00
 					if(!array_key_exists($vals->id_ang,$x)){
-						$x[$vals->id_ang][$i] = array();
+						$x[$vals->id_ang][$i] = array(
+							'inceput' => 0,
+							'sfarsit' => 0,
+							'tip' => 0,
+						);
 					}
 					
 					$j = $i;
@@ -1407,7 +1504,15 @@ class Pontaj extends CI_Controller {
 						$valAfisare = 'CO';
 						
 						## verifica daca s-a intarziat mai putin de 5 minute
+						## => se iarta intarzierea
 						if($tIntrare > 480 && $tIntrare <= 485){
+							$x['clasa'] .= '"pontat22i"';
+							$diffCalcul = $diffCalcul - 15;
+							$x['diff'] = $x['diff'] - 15;
+							$pont = $pont + 15;
+						
+						## daca s-a intarziat pana in 15 minute, trebuie doar evidentiat
+						}elseif($tIntrare > 485 && $tIntrare <= 495){
 							$x['clasa'] .= '"pontat22i"';
 						}else{
 							$x['clasa'] .= '"pontat22 w3-dark-grey"';
@@ -1422,7 +1527,15 @@ class Pontaj extends CI_Controller {
 						$valAfisare = '8';
 						
 						## verifica daca s-a intarziat mai putin de 5 minute
+						## => se iarta intarzierea
 						if($tIntrare > 480 && $tIntrare <= 485){
+							$x['clasa'] .= '"pontat11i"';
+							$diffCalcul = $diffCalcul - 15;
+							$x['diff'] = $x['diff'] - 15;
+							$pont = $pont + 15;
+						
+						## daca s-a intarziat pana in 15 minute, trebuie doar evidentiat
+						}elseif($tIntrare > 485 && $tIntrare <= 495){
 							$x['clasa'] .= '"pontat11i"';
 						}else{
 							$x['clasa'] .= '"pontat11"';
@@ -1453,7 +1566,7 @@ class Pontaj extends CI_Controller {
 		}
 		
 		$x['diffCalc'] = $diffCalcul;
-		
+		#var_dump($x);
 		return $x;
 	}
 	
@@ -1991,7 +2104,13 @@ class Pontaj extends CI_Controller {
 				
 				## calculeaza intrarea
 				$mIn = $this->extractData($vals, 'mc');
-				$timeInCalculat = $this->verificaTIn($mIn);
+				
+				## verifica daca e in cele 5 minute permise
+				if($mIn >= 480 && $mIn <= 485){
+					$timeInCalculat = 480;
+				} else {
+					$timeInCalculat = $this->verificaTIn($mIn);
+				}
 				
 				## verifica daca exista cheie pentru iesire
 				if(array_key_exists($key, $out)){
